@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+
+
+
+  {% if submitted %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>Congratulations, Regristration Successful!!!</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</div>
+<div class="container">
+      <br/><br/><br/>
+      <h1>Register Below!!!</h1>
+      <br/>
+      <form action="" method=POST>
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <input type="submit" value="Submit" class="btn btn-warning">
+  </form>
+
+</div>
+  {% else %}
+<div class="container"> 
+  <br/><br/><br/>
+  <h1>Register Below!!!</h1>
+      <br/>
+      <form action="" method=POST>
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <input type="submit" value="Submit" class="btn btn-warning">
+  </form>
+</div>
+  {% endif %}
+  
+
+{% endblock %}
+

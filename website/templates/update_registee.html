@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+<div class="container">
+<br/><br/><br/><br/>
+<h6><a href="{% url 'pdf_registee' registered.id %}">Download tag</a></h6>
+<br/>
+<center><h1>Record for {{ registered }}</h1></center>
+<br><br>
+<form action="", method=POST>
+  {% csrf_token %}
+  {{ form.as_p }}
+  <br>
+  <input type="submit" value="Update" class="btn btn-warning">
+
+
+{% endblock %}
+

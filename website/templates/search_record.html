@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+<div class="container">
+  <br/><br/><br/>
+    <h1>You searched for {{ lastname }}</h1>
+      <br/>
+    {% if searched %}  
+      {% if success %}
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Surname</th>
+              <th scope="col">Fist name- Husband</th>
+              <th scope="col">First name- Wife</th>
+              <th scope="col">Download Tag</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">{{ id }}</th>
+              <td>{{ s_name }}</td>
+              <td>{{ f_name_m }}</td>
+              <td>{{ f_name_f }}</td>
+              <td><button type="button" class="btn btn-outline-warning"><a href="{% url 'pdf_registee' user.id %}">Download Tag</a></button></td>
+            </tr>
+          </tbody>
+          </table>
+      {% else %}
+        <div class="alert alert-primary" role="alert">
+        Record not found...
+      </div>
+      {% endif %}
+    {% endif %}
+  
+</div>
+
+
+{% endblock %}
+

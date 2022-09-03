@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+  <br/><br/><br/><br/><br/>
+  <div class="container">
+  <form class="d-flex" role="search" method="POST">
+    {% csrf_token %}
+        <input class="form-control me-2" type="search" placeholder="{{ search }}" aria-label="Search" name="searched" required>
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+  </div>
+  <br/><br/>
+  <center><h1>Registered Participants</h1></center>
+
+<table class="table table-Secondary table-striped table-hover">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Last Name</th>
+      <th scope="col">First Name</th>
+      <th scope="col">Phone Number</th>
+      <th scope="col">Email Address</th>
+      <th scope="col">First Name</th>
+      <th scope="col">Phone Number</th>
+      <th scope="col">Email Address</th>
+      <th scope="col">Attendance</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for user in registered_list%}
+    <tr>
+      <th scope="row">{{ user.id }}</th>
+      <td><a href="{% url 'update_registee' user.id %}">{{ user.s_name }}</a></td>
+      <td>{{ user.f_name_m }}</td>
+      <td>{{ user.phone_no_m }}</td>
+      <td>{{ user.email_m }}</td>
+      <td>{{ user.f_name_f }}</td>
+      <td>{{ user.phone_no_f }}</td>
+      <td>{{ user.email_f }}</td>
+      <td>{{ user.present }}</td>
+      <td><div class="dropdown">
+          <a class="btn btn-outline-warning dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Action</a>
+
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'update_registee' user.id %}">Update Record</a></li>
+            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete Record</a></li>
+            <li><a class="dropdown-item" href="{% url 'pdf_registee' user.id %}">Download Tag</a></li>
+            <li><a class="dropdown-item" href="{% url 'show_registee' user.id %}">Confirm Attend...</a></li>
+          </ul>
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Delete Record for {{ user.s_name }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  Are you sure you want to permanently delete this record?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                  <button type="button" class="btn btn-danger" name="yes"><a href="{% url 'delete_registee' user.id %}">Yes</a></button>
+                </div>
+              </div>
+            </div>
+          </div>
+      </td>
+    </tr>
+    
+    {% endfor %}
+  </tbody>
+</table>
+  
+
+      
+    {% endblock %}
