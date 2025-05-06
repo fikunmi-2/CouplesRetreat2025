@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+<br><br><br>
+    <h1>Message Templates</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Title</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for template in templates %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ template.title }}</td>
+                <td>{{ template.subject }}</td>
+                <td>
+                    <div class="dropdown">
+                        <a class="btn btn-outline-warning dropdown-toggle"
+                           href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Action</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editTemplate{{ template.id }}" data-id = "{{ template.id }}">Edit Template</a></li>
+                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteTemplate{{ template.id }}">Delete Template</a></li>
+                            <li><a class="dropdown-item" href="{% url 'send_message' %}">Send Message</a></li>
+                        </ul>
+                    </div>
+                    <div class="modal fade" id="deleteTemplate{{ template.id }}" tabindex="-1" aria-labelledby="deleteTemplate{{ template.id }}Label" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="deleteTemplate{{ template.id }}Label">Delete Template: {{ template.title }}</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          Are you sure you want to permanently delete this template?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                            <form method="POST" action="{% url 'delete_template' template.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Yes</button>
+                            </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal fade" id="editTemplate{{ template.id }}" tabindex="-1" aria-labelledby="editTemplate{{ template.id }}Label" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editTemplate{{ template.id }}Label">Edit Template: {{ template.title }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editTemplateForm{{ template.id }}" method="POST" action="{% url 'update_template' template.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id" value="{{ template.id }}">
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Title</label>
+                                        <input type="text" class="form-control" id="title" name="title" value="{{ template.title }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="subject" class="form-label">Subject</label>
+                                        <input type="text" class="form-control" id="subject" name="subject" value="{{ template.subject }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="content_sms_{{ template.id }}" class="form-label">SMS Content</label>
+                                        <textarea class="form-control" id="content_sms_{{ template.id }}" name="content_sms" rows="3">{{ template.content_sms }}</textarea>
+                                        <small id="smsCharCount_{{ template.id }}" class="form-text text-muted"></small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="content_email_whatsapp_{{ template.id }}" class="form-label">Email/WhatsApp Content</label>
+                                        <textarea class="form-control" id="content_email_whatsapp_{{ template.id }}" name="content_email_whatsapp" rows="5">{{ template.content_email_whatsapp }}</textarea>
+                                        <small id="emailWhatsappCharCount_{{ template.id }}" class="form-text text-muted">Current characters: 0</small>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button id="submitEditForm{{ template.id }}" type="submit" form="editTemplateForm" class="btn btn-warning">Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No templates found.</td>
+            </tr>
+            {% endfor %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Initialize TinyMCE for email/WhatsApp content (works for each modal)
+    function initTinyMCE(modalId) {
+        const editorId = `content_email_whatsapp_${modalId}`;
+        // Only initialize if TinyMCE is not yet initialized
+        if (!tinymce.get(editorId)) {
+            tinymce.init({
+                selector: `#${editorId}`,  // Use modal-specific ID
+                height: 300,
+                plugins: 'link image code lists',
+                toolbar: 'undo redo | bold italic underline | bullist numlist | link image | code',
+                setup: function (editor) {
+                    editor.on('input', function () {
+                        const content = editor.getContent({ format: 'text' });
+                        document.getElementById(`emailWhatsappCharCount_${modalId}`).textContent = `Current characters: ${content.length}`;
+                    });
+                }
+            });
+        }
+    }
+
+    // SMS content character count (works for each modal)
+    function initSMSCount(modalId) {
+        const smsTextArea = document.getElementById(`content_sms_${modalId}`);
+        const smsCharCount = document.getElementById(`smsCharCount_${modalId}`);
+
+        smsTextArea.addEventListener('input', function () {
+            const totalChars = smsTextArea.value.length;
+            let pages = 1;
+            let charsInLastPage = totalChars;
+
+            if (totalChars > 160) {
+                const remainingAfterFirstPage = totalChars - 160;
+                pages = Math.ceil(remainingAfterFirstPage / 153) + 1;
+                charsInLastPage = remainingAfterFirstPage % 153;
+                if (charsInLastPage === 153) charsInLastPage = 0;
+            }
+
+            smsCharCount.textContent = `Pages: ${pages}, Left: ${charsInLastPage}, Total: ${totalChars}`;
+        });
+    }
+
+    // Store original values when modal opens
+    function storeOriginalValues(modal) {
+        const inputs = modal.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            if (input.tagName === 'TEXTAREA' && input.classList.contains('tox-textarea')) {
+                const editor = tinymce.get(input.id);  // Get the TinyMCE editor instance
+                if (editor) {
+                    input.setAttribute('data-original-value', editor.getContent());  // Store TinyMCE content
+                }
+            } else {
+                input.setAttribute('data-original-value', input.value);  // Store regular input value
+            }
+        });
+    }
+
+    // Reset content for TinyMCE when modal is closed
+    function resetModalContent(modal) {
+        const inputs = modal.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            if (input.id.startsWith("content_email_whatsapp_")) {
+                const editor = tinymce.get(input.id);  // Get TinyMCE editor instance
+                if (editor) {
+                    const originalContent = input.getAttribute('data-original-value');
+                    editor.setContent(originalContent);  // Reset TinyMCE content to the original value
+                }
+            } else {
+                input.value = input.getAttribute('data-original-value');  // Reset regular inputs
+            }
+        });
+    }
+
+    // Handle modals
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        modal.addEventListener('shown.bs.modal', function () {
+            const modalId = modal.id.replace('editTemplate', '');
+
+            storeOriginalValues(modal); // Store values on open
+            initSMSCount(modalId);
+            initTinyMCE(modalId);
+
+            // Save changes button functionality
+            document.getElementById(`submitEditForm${modalId}`).addEventListener('click', function () {
+                const form = document.getElementById(`editTemplateForm${modalId}`);
+                form.submit();
+            });
+        });
+
+        modal.addEventListener('hide.bs.modal', function (event) {
+            const form = modal.querySelector('form');
+            let hasUnsavedChanges = false;
+
+            if (form) {
+                const inputs = form.querySelectorAll('input, textarea');
+                inputs.forEach(input => {
+                    let currentValue;
+                    if (input.id.startsWith("content_email_whatsapp_")) {
+                        const editor = tinymce.get(input.id);
+                        currentValue = editor ? editor.getContent() : input.value;
+                    } else {
+                        currentValue = input.value;
+                    }
+
+                    const originalValue = input.getAttribute('data-original-value');
+                    if (originalValue !== currentValue) {
+                        hasUnsavedChanges = true;
+                    }
+                });
+            }
+
+            if (hasUnsavedChanges) {
+                const confirmation = confirm('You have unsaved changes. Are you sure you want to close the modal?');
+                if (!confirmation) {
+                    event.preventDefault(); // Stop modal from closing
+                } else {
+                    resetModalContent(modal); // Reset content if user confirms
+                }
+            }
+        });
+
+        modal.addEventListener('hidden.bs.modal', function () {
+            const modalId = modal.id.replace('editTemplate', '');
+            const editorId = `content_email_whatsapp_${modalId}`;
+            const editor = tinymce.get(editorId);
+
+            if (editor) {
+                editor.remove(); // Destroy TinyMCE instance to prevent memory leaks
+            }
+        });
+    });
+});
+
+</script>
+        </tbody>
+    </table>
+</div>
+
+
+{% endblock %}

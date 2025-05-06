@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Couple Details</h2>
+
+  <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <th>Surname</th>
+        <td>{{ registered.s_name }}</td>
+      </tr>
+      <tr>
+        <th>Husband's First Name</th>
+        <td>{{ registered.f_name_m }}</td>
+      </tr>
+      <tr>
+        <th>Wife's First Name</th>
+        <td>{{ registered.f_name_f }}</td>
+      </tr>
+      <tr>
+        <th>Husband's Phone</th>
+        <td>{{ registered.phone_no_m }}</td>
+      </tr>
+      <tr>
+        <th>Wife's Phone</th>
+        <td>{{ registered.phone_no_f }}</td>
+      </tr>
+      <tr>
+        <th>Husband's Email</th>
+        <td>{{ registered.email_m }}</td>
+      </tr>
+      <tr>
+        <th>Wife's Email</th>
+        <td>{{ registered.email_f }}</td>
+      </tr>
+      <tr>
+        <th>Year Married</th>
+        <td>{{ registered.year_married }}</td>
+      </tr>
+      <tr>
+        <th>How Heard About Program</th>
+        <td>{{ registered.how_heard_about_program }}</td>
+      </tr>
+      <tr>
+        <th>Attended Previously</th>
+        <td>{% if registered.attended_previous %}✅ Yes{% else %}❌ No{% endif %}</td>
+      </tr>
+      <tr>
+        <th>Present</th>
+        <td>{% if registered.present %}✅ Yes{% else %}❌ No{% endif %}</td>
+      </tr>
+      <tr>
+        <th>Comments</th>
+        <td>{{ registered.comments }}</td>
+      </tr>
+      <tr>
+        <th>Has Downloaded Tag?</th>
+        <td>{% if registered.has_downloaded_tag %}✅ Yes{% else %}❌ No{% endif %}</td>
+      </tr>
+      <tr>
+        <th>Has Confirmed Attendance?</th>
+        <td>{% if registered.has_confirmed_attendance %}✅ Yes{% else %}❌ No{% endif %}</td>
+      </tr>
+      <tr>
+        <th>Is Present?</th>
+        <td>{% if registered.is_present %}✅ Yes{% else %}❌ No{% endif %}</td>
+      </tr>
+      <tr>
+        <th>Comments</th>
+        <td>{{ registered.comments }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <a href="{% url 'pdf_registee' registered.unique_id %}" class="btn btn-outline-primary mt-3">Download Tag</a>
+</div>
+{% endblock %}

@@ -1,61 +1,197 @@
+{% load static %}
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-100">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>2022 Couples Retreat</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <title>2025 Couples Retreat</title>
+
+      <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- TinyMCE (if needed) -->
+    <script src="https://cdn.tiny.cloud/1/07pt0nxfymsp3w3qtoyzf8kb9h78fdjdabwqkzk4jteyzya8/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        padding-top: 56px;
+      }
+
+      .wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .content {
+        flex: 1;
+      }
+
+      footer {
+        background-color: #f8f9fa;
+        padding: 15px 0;
+        text-align: center;
+        border-top: 1px solid #dee2e6;
+        font-size: 14px;
+        color: #6c757d;
+      }
+
+      .navbar-nav .nav-link.active {
+          font-weight: 600;
+          color: #c9cfe7 !important;
+          border-bottom: 2px solid #c9cfe7;
+        }
+
+      .dropdown-menu .dropdown-item:hover {
+        background-color: #b6bee1;
+      }
+
+      .navbar-nav .nav-link {
+        font-size: 0.9rem;
+        padding-left: 0.6rem;
+        padding-right: 0.6rem;
+        display: flex;
+        align-items: center;
+      }
+
+      @media (max-width: 991.98px) {
+        .navbar-nav {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          white-space: nowrap;
+        }
+
+        .navbar-nav::-webkit-scrollbar {
+          display: none;
+        }
+        .navbar-nav .nav-link:hover {
+          color: #ffffff !important;
+        }
+      }
+    </style>
   </head>
-  <body>
-     <nav class="navbar navbar-expand-lg navbar fixed-top navbar-dark bg-secondary">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="{% url 'home' %}"><strong>2022 Couples Retreat</strong></a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link " aria-current="page" href="{% url 'home' %}">Home</a>
-              </li>
-              {% if user.is_authenticated %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'admin_logout' %}">Admin Logout</a>
-                </li>
 
-              {% else %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'admin_login' %}">Admin Login</a>
-                </li>
+  <body class="d-flex flex-column min-vh-100">
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: #5e6274;">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'home' %}"><strong>2025 Couples Retreat</strong></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-              {% endif %}
-              <li class="nav-item">
-                <a class="nav-link" href="#">Contact Us</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'register' %}">Register</a>
-              </li>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+      {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+        </li>
+
+        {% if user.is_superuser %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name in 'send_message view_templates message_template_create' %}active{% endif %}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Messaging</a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item {% if request.resolver_match.url_name == 'send_message' %}active{% endif %}" href="{% url 'send_message' %}">Send Message</a></li>
+              <li><a class="dropdown-item {% if request.resolver_match.url_name == 'view_templates' %}active{% endif %}" href="{% url 'view_templates' %}">View Templates</a></li>
+              <li><a class="dropdown-item {% if request.resolver_match.url_name == 'message_template_create' %}active{% endif %}" href="{% url 'message_template_create' %}">Message Template</a></li>
+              <li><a class="dropdown-item {% if request.resolver_match.url_name == 'message_dashboard' %}active{% endif %}" href="{% url 'message_dashboard' %}">Message Dashboard</a></li>
             </ul>
-          </div>
-        </div>
-      </nav>
-      <div class="container">
-      {% if messages %}
-        <br><br><br>
-        {% for message in messages %}
-          <div class="alert alert-warning alert-dismissible fade show" role="alert">
-          {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'view-registered' %}active{% endif %}" href="{% url 'view-registered' %}">View Couples</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'view_comments' %}active{% endif %}" href="{% url 'view_comments' %}">View Comments</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'manage_resources' %}active{% endif %}" href="{% url 'manage_resources' %}">Manage Resources</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" href="{% url 'register' %}">Register</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}" href="{% url 'user_list' %}">Users</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'create_user' %}active{% endif %}" href="{% url 'create_user' %}">Create Users</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'upload_registered_excel' %}active{% endif %}" href="{% url 'upload_registered_excel' %}">Import/Export</a>
+          </li>
+            <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'assign_labourers' %}active{% endif %}" href="{% url 'assign_labourers' %}">Assign Labourers</a>
+          </li>
+        {% endif %}
 
-        {% endfor %}
+        {% if user.is_staff %}
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'labourer_dashboard' %}active{% endif %}" href="{% url 'labourer_dashboard' %}">My Assigned Couples</a>
+          </li>
+            {% endif %}
+          {% if user.is_staff and not user.is_superuser%}
+            <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'resources' %}active{% endif %}" href="{% url 'resources' %}">Resources</a>
+        </li>
+        {% endif %}
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin_logout' %}">Logout</a>
+        </li>
+
+      {% else %}
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'admin_login' %}active{% endif %}" href="{% url 'admin_login' %}">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'resources' %}active{% endif %}" href="{% url 'resources' %}">Resources</a>
+        </li>
       {% endif %}
-      </div>
+    </ul>
+    </div>
+  </div>
+</nav>
 
+    <div class="wrapper">
+      <main class="content container py-4">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success {% elif message.tags == 'warning' %}alert-warning {% elif message.tags == 'info' %}alert-info {% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+              {{ message|safe }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
 
-      {% block content %}
+        {% block content %}
+        {% endblock %}
+      </main>
 
-      {% endblock %}
+      <footer class="bg-light py-3 text-center mt-auto">
+        <small>&copy; 2025 Couples Retreat. All rights reserved.</small>
+          • <a href="{% url 'privacy_policy' %}">Privacy Policy</a>
+      </footer>
+    </div>
 
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+            crossorigin="anonymous"></script>
   </body>
 </html>

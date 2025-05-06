@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Add Resource</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Resource Name</label>
+            <input type="text" class="form-control" name="name" id="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" name="description" id="description" rows="4" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="link" class="form-label">Resource Link (URL)</label>
+            <input type="url" class="form-control" name="link" id="link" required>
+        </div>
+        <button type="submit" class="btn btn-success">Save Resource</button>
+        <a href="{% url 'manage_resources' %}" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>
+{% endblock %}

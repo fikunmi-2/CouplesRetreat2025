@@ -1,45 +1,240 @@
 {% extends 'base.html' %}
 
-
-
 {% block content %}
+<div class="container my-5">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
 
+    <div class="card shadow-lg">
+        <div class="card-body p-4">
+            <!-- Decorative Header -->
+            <div class="text-center mb-4">
+                <div class="heart-icon mb-2">❤️</div>
+                <h2 class="heading-title">Couples Retreat Registration</h2>
+                <p class="sub-note">We’re excited to have you join us!</p>
+            </div>
 
+            <form method="POST" id="registrationForm" novalidate>
+                {% csrf_token %}
 
-  {% if submitted %}
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <strong>Congratulations, Regristration Successful!!!</strong>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
+                <!-- Marriage Info Section -->
+                <h4 class="section-title text-primary mb-3">Marriage Info</h4>
+                <div class="section-divider mb-4"></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.s_name.label_tag }}
+                        {{ form.s_name }}
+                        {% if form.s_name.errors %}
+                            <small class="form-error">⚠ {{ form.s_name.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.year_married.label_tag }}
+                        {{ form.year_married }}
+                        {% if form.year_married.errors %}
+                            <small class="form-error">⚠ {{ form.year_married.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.attended_previous.label_tag }}
+                        {{ form.attended_previous }}
+                        {% if form.attended_previous.errors %}
+                            <small class="form-error">⚠ {{ form.attended_previous.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Husband Details Section -->
+                <h4 class="section-title text-primary mb-3">Husband's Info</h4>
+                <div class="section-divider mb-4"></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.f_name_m.label_tag }}
+                        {{ form.f_name_m }}
+                        {% if form.f_name_m.errors %}
+                            <small class="form-error">⚠ {{ form.f_name_m.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="id_phone_no_m" class="form-label">Husband's WhatsApp Number <span class="form-note">(e.g. +2348012345678)</span></label>
+                        {{ form.phone_no_m }}
+                        {% if form.phone_no_m.errors %}
+                            <small class="form-error">⚠ {{ form.phone_no_m.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.email_m.label_tag }}
+                        {{ form.email_m }}
+                        {% if form.email_m.errors %}
+                            <small class="form-error">⚠ {{ form.email_m.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Wife Details Section -->
+                <h4 class="section-title text-primary mb-3">Wife's Info</h4>
+                <div class="section-divider mb-4"></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.f_name_f.label_tag }}
+                        {{ form.f_name_f }}
+                        {% if form.f_name_f.errors %}
+                            <small class="form-error">⚠ {{ form.f_name_f.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="id_phone_no_f" class="form-label">Wife's WhatsApp Number <span class="form-note">(e.g. +2348012345678)</span></label>
+                        {{ form.phone_no_f }}
+                        {% if form.phone_no_f.errors %}
+                            <small class="form-error">⚠ {{ form.phone_no_f.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.email_f.label_tag }}
+                        {{ form.email_f }}
+                        {% if form.email_f.errors %}
+                            <small class="form-error">⚠ {{ form.email_f.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Feedback Section -->
+                <h4 class="section-title text-primary mb-3">Feedback</h4>
+                <div class="section-divider mb-4"></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.how_heard_about_program.label_tag }}
+                        {{ form.how_heard_about_program }}
+                        {% if form.how_heard_about_program.errors %}
+                            <small class="form-error">⚠ {{ form.how_heard_about_program.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        {{ form.comments.label_tag }}
+                        {{ form.comments }}
+                        {% if form.comments.errors %}
+                            <small class="form-error">⚠ {{ form.comments.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" id="submitButton" class="btn btn-primary px-5 mt-3">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-<div class="container">
-      <br/><br/><br/>
-      <h1>Register Below!!!</h1>
-      <br/>
-      <form action="" method=POST>
-    {% csrf_token %}
 
-    {{ form.as_p }}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-    <input type="submit" value="Submit" class="btn btn-warning">
-  </form>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f9f9f9;
+    }
 
-</div>
-  {% else %}
-<div class="container"> 
-  <br/><br/><br/>
-  <h1>Register Below!!!</h1>
-      <br/>
-      <form action="" method=POST>
-    {% csrf_token %}
+    .card {
+        background: linear-gradient(to bottom right, #ffe6ea, #e4f0ff);
+        border: none;
+        border-radius: 15px;
+    }
 
-    {{ form.as_p }}
+    .heading-title {
+        font-weight: 600;
+        font-size: 1.8rem;
+        color: #c2185b;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
 
-    <input type="submit" value="Submit" class="btn btn-warning">
-  </form>
-</div>
-  {% endif %}
-  
+    .heart-icon {
+        font-size: 2rem;
+    }
 
+    .sub-note {
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    .section-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        margin-top: 2rem;
+    }
+
+    .section-divider {
+        height: 4px;
+        background: linear-gradient(to right, #c2185b, #2196f3, transparent);
+        border-radius: 5px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .form-note {
+        font-size: 0.85rem;
+        color: #6c757d;
+        display: block;
+        margin-top: 2px;
+    }
+
+    .form-error {
+        color: #dc3545;
+        font-size: 0.85rem;
+        display: block;
+        margin-top: 3px;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let phoneInputs = document.querySelectorAll(".phone-input");
+
+        phoneInputs.forEach(input => {
+            if (!input.value.startsWith("+")) {
+                input.value = "+";
+            }
+
+            input.addEventListener("input", function () {
+                if (!this.value.startsWith("+")) {
+                    this.value = "+" + this.value.replace(/[^0-9]/g, "");
+                } else {
+                    this.value = "+" + this.value.substring(1).replace(/[^0-9]/g, "");
+                }
+            });
+
+            input.addEventListener("keydown", function (event) {
+                if (this.selectionStart === 1 && event.key === "Backspace") {
+                    event.preventDefault();
+                }
+            });
+
+            input.addEventListener("paste", function (event) {
+                event.preventDefault();
+                let pasteData = (event.clipboardData || window.clipboardData).getData("text");
+                this.value = "+" + pasteData.replace(/[^0-9]/g, "");
+            });
+        });
+    });
+</script>
 {% endblock %}
-

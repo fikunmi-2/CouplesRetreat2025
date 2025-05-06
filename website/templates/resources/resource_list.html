@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">📚 Available Resources</h2>
+    {% for res in resources %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ res.name }}</h5>
+                <p class="card-text">{{ res.description }}</p>
+                <a href="{{ res.link }}" class="btn btn-outline-primary" target="_blank">View Resource</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No resources available yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

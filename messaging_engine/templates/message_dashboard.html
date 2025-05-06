@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <br/><br/><br/><br/>
+
+    <div class="container">
+        <h1>Message Dashboard</h1>
+
+        <table class="table table-Secondary table-striped table-hover table-bordered">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Message Title</th>
+                    <th>Delivery Method</th>
+                    <th>Delivery Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for message in messages_initiated %}
+                    <tr>
+                        <td><a href="{% url 'message_detail' message.id %}">{{ message.template.title }}</a></td>
+                        <td>{{ message.delivery_method }}</td>
+                        {% if message.delivery_time == "scheduled" %}
+                            <td>{{ message.schedule_date }} at {{ message.schedule_time }}</td>
+                        {% else %}
+                            <td>{{ message.delivery_time }}</td>
+                        {% endif %}
+                        <td>{{ message.status }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+{% endblock %}

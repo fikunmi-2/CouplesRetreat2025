@@ -1,0 +1,574 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+<br/><br/><br/>
+<h1>Send Message</h1>
+<div class="container mt-4">
+    <form id="sendMessageForm">
+    {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="recipientSource" class="form-label">Choose Recipient Source</label>
+            <select id="recipientSource" name="recipientSource" class="form-select" required>
+                <option value="" disabled selected>Select a recipient source</option>
+                <option value="db">Registered Participants</option>
+                <option value="excel">Import from Excel</option>
+                <option value="custom">Customize</option>
+            </select>
+        </div>
+
+        <div id="excelUploadSection" class="d-none">
+            <p class="text">
+                <strong>Note:</strong> The uploaded Excel file must include the following fields:
+                <code>["s_name", "f_name_m", "phone_no_m", "email_m", "f_name_f", "phone_no_f", "email_f"]</code>
+            </p>
+            <meta name="csrf-token" content="{{ csrf_token }}">
+            <label for="excelFile" class="form-label">Upload Excel File</label>
+            <input type="file" id="excelFile" name="excelFile" class="form-control" accept=".xls, .xlsx">
+        </div>
+        <div id="uploadStatus" class="mt-2"></div>
+
+        <!-- Customize Filter Section -->
+          <div id="customFilterSection" class="border p-3 d-none">
+            <label for="filter_field" class="form-label">Filter Field:</label>
+            <select name="filter_field" id="filter_field" class="form-select" >
+              <option value="">-- Choose a field --</option>
+              <option value="s_name">Surname</option>
+              <option value="f_name_m">Husband's First Name</option>
+              <option value="phone_no_m">Husband's Phone Number</option>
+              <option value="email_m">Husband's Email</option>
+              <option value="f_name_f">Wife's First Name</option>
+              <option value="phone_no_f">Wife's Phone Number</option>
+              <option value="email_f">Wife's Email</option>
+              <option value="year_married">Year Married</option>
+              <option value="attended_previous">Attended Previous Version?</option>
+              <option value="how_heard_about_program">How You Heard About Program</option>
+              <option value="has_downloaded_tag">Has Downloaded Tag</option>
+              <option value="has_confirmed_attendance">Has Confirmed Attendance</option>
+              <option value="is_present">Will Be Present</option>
+            </select><br>
+
+            <label for="filter_operator" class="form-label">Operator:</label>
+            <select name="filter_operator" id="filter_operator" class="form-select">
+                <option value="">-- Select operator --</option>
+            </select><br>
+
+            <div id="filter_value_container">
+              <label for="filter_value" class="form-label">Value:</label>
+              <input class="form-control" type="text" name="filter_value" id="filter_value" placeholder="Enter value">
+            </div>
+          </div>
+        <br>
+        <div id="templateSelectSection" class="mb-3 d-none">
+            <label for="templateSelect" class="form-label">Choose Template</label>
+            <select id="templateSelect" name="template_id" class="form-select">
+                <option value="" disabled selected>Select a template</option>
+                {% for template in templates %}
+                    <option value="{{ template.id }}">
+                        {{ template.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <br>
+
+        <div id="templatePreview" class="border p-3 d-none">
+            <h5>Template Preview</h5>
+            <p id="templateContent">Select a template to see its content here.</p>
+        </div>
+        <div>
+            <br>
+            <div id="deliveryMethod" class="border p-3 d-none">
+                <h5>Choose Delivery Method</h5>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="smsCheckbox" name="delivery_method" value="SMS" disabled>
+              <label class="form-check-label" for="smsCheckbox">SMS</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="whatsappCheckbox" name="delivery_method" value="WhatsApp" disabled>
+              <label class="form-check-label" for="whatsappCheckbox">WhatsApp</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="emailCheckbox" name="delivery_method" value="Email" disabled>
+              <label class="form-check-label" for="emailCheckbox">Email</label>
+            </div>
+            </div>
+
+            <p id="warningMessage" class="border p-3 text-danger d-none">Both SMS and Email/WhatsApp content are empty. Please update the template.</p>
+        </div>
+        <br>
+        <div id="deliveryTiming" class="border p-3 d-none">
+            <h5>When do you want the message sent?</h5>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="delivery_time" id="immediateRadio" value="immediate" checked>
+                <label class="form-check-label" for="immediateRadio">Send Immediately</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="delivery_time" id="scheduledRadio" value="scheduled">
+                <label class="form-check-label" for="scheduledRadio">Scheduled</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="delivery_time" id="recurringRadio" value="recurring" disabled>
+                <label class="form-check-label" for="recurringRadio">Recurring</label>
+            </div><br>
+        </div>
+
+        <div id="scheduledDetails" class="border p-3 d-none">
+            <h6>Schedule the Message</h6>
+            <label for="scheduleDate">Date:</label>
+            <input type="date" id="scheduleDate" name="scheduleDate" min="">
+            <label for="scheduleTime">Time:</label>
+            <input type="time" id="scheduleTime" name="scheduleTime" min="">
+        </div>
+
+        <div id="recurringDetails" class="border p-3 d-none">
+            <h6>Recurring Message</h6>
+            <label for="recurringDate">Date:</label>
+            <input type="date" id="recurringDate" name="recurringDate">
+            <label for="recurringTime">Time:</label>
+            <input type="time" id="recurringTime" name="recurringTime"><br>
+            <label for="recurrenceInterval">Recurrence Interval:</label>
+            <select id="recurrenceInterval" name="recurrenceInterval">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+        </div>
+
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary" id="submitButton" disabled>Send Message</button>
+            <br><br><br>
+        </div>
+    </form>
+</div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const templateSelect = document.getElementById("templateSelect");
+    const templatePreview = document.getElementById("templatePreview");
+    const templateContent = document.getElementById("templateContent");
+    const deliveryMethod = document.getElementById("deliveryMethod");
+    const warningMessage = document.getElementById("warningMessage");
+    const smsCheckbox = document.getElementById("smsCheckbox");
+    const emailCheckbox = document.getElementById("emailCheckbox");
+    const whatsappCheckbox = document.getElementById("whatsappCheckbox");
+    const deliveryTiming = document.getElementById("deliveryTiming");
+    const sendMessageForm = document.getElementById("sendMessageForm");
+    const deliveryMethodCheckboxes = document.querySelectorAll('input[name="delivery_method"]');
+    const deliveryTimeRadios = document.querySelectorAll('input[name="delivery_time"]');
+    const scheduleDate = document.getElementById("scheduleDate");
+    const scheduleTime = document.getElementById("scheduleTime");
+    const recurringDate = document.getElementById("recurringDate");
+    const recurringTime = document.getElementById("recurringTime");
+    const recurrenceInterval = document.getElementById("recurrenceInterval");
+    const submitButton = document.getElementById("submitButton");
+    const recipientSource = document.getElementById("recipientSource");
+    const excelUploadSection = document.getElementById("excelUploadSection");
+    const customFilterSection = document.getElementById("customFilterSection");
+    const templateSelectSection = document.getElementById("templateSelectSection");
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+    const filterOperator = document.getElementById("filter_operator");
+    const filterField = document.getElementById("filter_field");
+    const filterValueContainer = document.getElementById("filter_value_container");
+    const filterValue = document.getElementById("filter_value");
+
+    recipientSource.addEventListener("change", function () {
+        recipientSource.disabled = true;
+        if (recipientSource.value === "db") {
+            templateSelectSection.classList.remove('d-none');
+        }
+        else if (recipientSource.value === "excel") {
+            excelUploadSection.classList.remove("d-none");
+        }
+        else {
+            customFilterSection.classList.remove("d-none")
+        }
+    });
+
+    const fieldTypeMap = {
+        s_name: "text",
+        f_name_m: "text",
+        phone_no_m: "text",
+        email_m: "text",
+        f_name_f: "text",
+        phone_no_f: "text",
+        email_f: "text",
+        year_married: "number",
+        attended_previous: "boolean_text",
+        how_heard_about_program: "text",
+        has_downloaded_tag: "boolean",
+        has_confirmed_attendance: "boolean",
+        is_present: "boolean"
+      };
+
+    const operatorMap = {
+        text: [
+          { value: "exact", label: "Equals (=)" },
+          { value: "icontains", label: "Contains" },
+          { value: "iexact", label: "Case-insensitive Equals" },
+          { value: "ne", label: "Not Equal (/=)" }
+        ],
+        number: [
+          { value: "exact", label: "Equals (=)" },
+          { value: "gt", label: "Greater Than (>)" },
+          { value: "lt", label: "Less Than (<)" },
+          { value: "gte", label: "Greater Than or Equal (>=)" },
+          { value: "lte", label: "Less Than or Equal (<=)" }
+        ],
+        boolean: [
+          { value: "true", label: "True (✅)" },
+          { value: "false", label: "False (❌)" }
+        ],
+        boolean_text: [
+          { value: "Yes", label: "Yes (✅)" },
+          { value: "No", label: "No (❌)" }
+        ]
+      };
+
+    filterField.addEventListener("change", function () {
+        const selectedField = filterField.value;
+        const fieldType = fieldTypeMap[selectedField];
+
+        filterOperator.innerHTML = '<option value="">-- Select operator --</option>';
+
+        if (!fieldType) {
+          filterValueContainer.style.display = "block";
+          filterValue.type = "text";
+          return;
+        }
+
+        const operators = operatorMap[fieldType] || [];
+        operators.forEach(op => {
+          const option = document.createElement("option");
+          option.value = op.value;
+          option.textContent = op.label;
+          filterOperator.appendChild(option);
+        });
+
+        if (fieldType === "boolean" || fieldType === "boolean_text") {
+          filterValueContainer.style.display = "none";
+        } else {
+          filterValueContainer.style.display = "block";
+          filterValue.type = fieldType === "number" ? "number" : "text";
+        }
+        checkAndRevealTemplateSection();
+      });
+
+    filterOperator.addEventListener("change", checkAndRevealTemplateSection);
+    filterValue.addEventListener("input", checkAndRevealTemplateSection);
+
+    function checkAndRevealTemplateSection() {
+      const selectedField = filterField.value;
+      const selectedOperator = filterOperator.value;
+      const fieldType = fieldTypeMap[selectedField];
+      const value = filterValue.value.trim();
+
+      // Ensure field and operator are selected
+      if (!selectedField || !selectedOperator) {
+        templateSelectSection.classList.add("d-none");
+        return;
+      }
+
+      // If value is needed, make sure it's filled
+      if (fieldType !== "boolean" && fieldType !== "boolean_text" && !value) {
+        templateSelectSection.classList.add("d-none");
+        return;
+      }
+
+      // All required inputs are filled → show section
+      templateSelectSection.classList.remove("d-none");
+    }
+
+
+    document.getElementById("excelFile").addEventListener("change", function () {
+        const excelFileInput = document.getElementById("excelFile");
+        const excelFile = excelFileInput.files[0];
+        const uploadStatus = document.getElementById("uploadStatus");
+        uploadStatus.textContent = "";
+        uploadStatus.className = "mt-2";
+
+        if (!excelFile) {
+            uploadStatus.textContent = "No file selected.";
+            uploadStatus.classList.add("text-danger");
+        }
+        else {
+
+            const formData = new FormData();
+            formData.append("excel_file", excelFile);
+            fetch("/messaging_engine/validate_excel_template", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+                body: formData,
+            })
+                .then(response => {
+                    // Parse the JSON response regardless of the status
+                    return response.json().then(data => ({
+                        status: response.status, // Include status for error handling
+                        ok: response.ok,        // Include ok for success checks
+                        data: data              // Include parsed JSON data
+                }));
+                })
+                .then(({ status, ok, data }) => {
+                    if (!ok) {
+                        uploadStatus.textContent = `${data.error || "Unknown error"}`;
+                        uploadStatus.classList.add("text-danger");
+                    } else {
+                        uploadStatus.textContent = "File uploaded successfully.";
+                        uploadStatus.classList.add("text-success");
+                        excelFileInput.disabled = true; // Disable input field
+                        templateSelectSection.classList.remove("d-none");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    uploadStatus.textContent = "Error uploading file. Please try again.";
+                    uploadStatus.classList.add("text-danger");
+                });
+        }
+    });
+
+    templateSelect.addEventListener("change", function () {
+        const templateId = this.value;
+        const excelFileInput = document.getElementById("excelFile");
+        const excelFile = excelFileInput.files[0];
+
+        if (templateId) {
+            // Make an AJAX request to fetch the template preview
+            console.log("inside: " + templateId)
+            if(recipientSource.value === "db") {
+                fetch(`/messaging_engine/preview_template/${templateId}/0`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch template preview.");
+                    }
+                    return response.json();
+                })
+                .then(data => {updateTemplatePreview(data)})
+                .catch(error => {handleTemplatePreviewError(error)});
+            }
+            else if(recipientSource.value === "custom") {
+                const formData = new FormData();
+                formData.append("filter_field", filterField.value);
+                formData.append("filter_operator", filterOperator.value);
+                formData.append("filter_value", filterValue.value);
+
+                fetch("/messaging_engine/preview_template_custom", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                    },
+                    body: formData
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            const userId = data.registered_id;
+                            const templateId = templateSelect.value;
+                            return fetch(`/messaging_engine/preview_template/${templateId}/${userId}`);
+                        } else {
+                            alert(data.message);
+                            throw new Error("No match found.");
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => updateTemplatePreview(data))
+                        .catch(err => handleTemplatePreviewError(err));
+            }
+            else {
+                if (excelFile) {
+                    const formData = new FormData();
+                    formData.append("template_id", templateId);
+                    formData.append("excel_file", excelFile);
+
+                    fetch('/messaging_engine/preview_template_excel', {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken" : csrfToken
+                        },
+                        body: formData,
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Failed to fetch template preview for Excel.")
+                            }
+                            return response.json();
+                        })
+                        .then(data => updateTemplatePreview(data))
+                        .catch(error => handleTemplatePreviewError(error));
+                }
+                else {
+                    alert("Please upload an exel file to preview template.")
+                }
+            }
+        }
+    });
+
+    function handleTemplatePreviewError(error) {
+        console.error(error);
+        templateContent.innerHTML = error;
+    }
+
+    function updateTemplatePreview(data) {
+        if (data.error) {
+            templateContent.innerHTML = `<strong>Error:</strong> ${data.error}`;
+        } else {
+            if (!data.sms_empty || !data.email_whatsapp_empty) {
+                templateContent.innerHTML = `
+                <strong>SMS Preview:</strong><br>${data.sms}<br><br>
+                <strong>Email/WhatsApp Preview:</strong><br>${data.email_whatsapp}
+            `;
+                templatePreview.classList.remove("d-none");
+                warningMessage.classList.add("d-none")
+                smsCheckbox.disabled = data.sms_empty;
+                whatsappCheckbox.disabled = data.email_whatsapp_empty;
+                emailCheckbox.disabled = data.email_whatsapp_empty;
+                deliveryMethod.classList.remove("d-none");
+                uncheckAllCheckboxes();
+                deliveryTiming.classList.remove("d-none");
+                document.getElementById("immediateRadio").checked = true;
+                document.getElementById('scheduledDetails').classList.add('d-none');
+                document.getElementById('recurringDetails').classList.add('d-none');
+                clearScheduleFields();
+                validateForm();
+            }
+            else {
+                templatePreview.classList.add("d-none");
+                warningMessage.classList.remove("d-none");
+                deliveryMethod.classList.add("d-none");
+                deliveryTiming.classList.add("d-none");
+                excelUploadSection.classList.add("d-none");
+                document.getElementById('scheduledDetails').classList.add('d-none');
+                document.getElementById('recurringDetails').classList.add('d-none');
+            }
+        }
+    }
+
+    function uncheckAllCheckboxes() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false; // Unchecks each checkbox
+    });
+}
+
+    document.querySelectorAll('input[name="delivery_time"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.value === 'scheduled') {
+            document.getElementById('scheduledDetails').classList.remove('d-none');
+            document.getElementById('recurringDetails').classList.add('d-none');
+        } else if (this.value === 'recurring') {
+            document.getElementById('recurringDetails').classList.remove('d-none');
+            document.getElementById('scheduledDetails').classList.add('d-none');
+        } else {
+            document.getElementById('scheduledDetails').classList.add('d-none');
+            document.getElementById('recurringDetails').classList.add('d-none');
+            clearScheduleFields();
+        }
+    });});
+
+    sendMessageForm.addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Gather form data into FormData format (for multipart/form-data)
+        const formData = new FormData(sendMessageForm);
+
+        // Append additional fields such as the file and recipient source
+        formData.append("excel_file", document.getElementById("excelFile").files[0]);
+        formData.append("recipientSource", document.getElementById("recipientSource").value);
+
+        // Ensure `delivery_method` is always an array if it's not already
+        const deliveryMethods = document.querySelectorAll("input[name='delivery_method']:checked");
+        const deliveryMethodValues = Array.from(deliveryMethods).map(input => input.value);
+        if (deliveryMethodValues.length > 0) {
+            formData.append('delivery_method', JSON.stringify(deliveryMethodValues));  // Append as JSON string if it's an array
+        }
+
+        // Log all form data to the console (for debugging purposes)
+        console.log("Form Data:");
+        formData.forEach((value, key) => {
+            console.log(`${key}: ${value}`);
+        });
+
+        // Send the form data via POST (without manually setting Content-Type, it will be handled automatically)
+        fetch('/messaging_engine/send_message', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')  // Include CSRF token for Django
+            },
+            body: formData
+        })
+        .then(response => response.json())  // Parse JSON response
+        .then(data => {
+            alert(data.message);  // Show success message
+            window.location.href = data.redirect_url;  // Redirect to the dashboard
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("There was an error sending the message.");
+        });
+    });
+
+
+    // Check if at least one checkbox is selected
+    function isAnyCheckboxChecked() {
+        console.log("Checking boxes")
+        return Array.from(deliveryMethodCheckboxes).some(checkbox => checkbox.checked);
+    }
+
+    // Validate form dynamically
+    function validateForm() {
+        const isDeliveryMethodValid = isAnyCheckboxChecked();
+        const isDeliveryTimeValid = Array.from(deliveryTimeRadios).some(radio => radio.checked);
+
+        // Check subfields based on delivery time
+        let isSubfieldValid = true;
+        if (document.getElementById("scheduledRadio").checked) {
+            isSubfieldValid = scheduleDate.value && scheduleTime.value;
+        } else if (document.getElementById("recurringRadio").checked) {
+            isSubfieldValid = recurringDate.value && recurringTime.value && recurrenceInterval.value;
+        }
+
+        // Enable/Disable Submit Button
+        submitButton.disabled = !(sendMessageForm.checkValidity() && isDeliveryMethodValid && isDeliveryTimeValid && isSubfieldValid);
+    }
+
+    sendMessageForm.addEventListener("input", validateForm);
+    sendMessageForm.addEventListener("change", validateForm);
+
+    function clearScheduleFields() {
+        scheduleDate.value = '';
+        scheduleTime.value = '';
+        recurringDate.value = '';
+        recurringTime.value = '';
+        recurrenceInterval.value = '';
+    }
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    scheduleDate.min = `${yyyy}-${mm}-${dd}`;
+    const hh = String(today.getHours()).padStart(2, '0');
+    const min = String(today.getMinutes()).padStart(2, '0');
+    const currentTime = `${hh}:${min}`
+    scheduleTime.min = currentTime;
+
+    scheduleDate.addEventListener("change", function () {
+        const selectedDate = new Date(scheduleDate.value + "T00:00:00"  );
+        console.log("Today: " + today);
+        console.log("Selected Date: " + selectedDate);
+        const isToday = selectedDate.toDateString() === today.toDateString();
+        scheduleTime.min = isToday ? currentTime : "00:00";
+        scheduleTime.value = isToday ? currentTime : "00:00";
+    });
+});
+
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">📝 Couples Feedback</h2>
+
+    {% if couples %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Surname</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for couple in couples %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'view_registee' couple.unique_id %}">
+                                    {{ couple.s_name }}
+                                </a>
+                            </td>
+                            <td>{{ couple.comments }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-center text-muted">No comments have been submitted yet.</p>
+    {% endif %}
+</div>
+
+<style>
+    table a {
+        font-weight: 600;
+        text-decoration: none;
+        color: #e91e63;
+    }
+
+    table a:hover {
+        color: #2196f3;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

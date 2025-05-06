@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <br><br>
+<div class="container mt-5">
+  <h2 class="mb-4">Confirm Attendance</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <th>Surname</th>
+        <td>{{ registered.s_name }}</td>
+      </tr>
+      <tr>
+        <th>Husband's Name</th>
+        <td>{{ registered.f_name_m }}</td>
+      </tr>
+      <tr>
+        <th>Wife's Name</th>
+        <td>{{ registered.f_name_f }}</td>
+      </tr>
+      <tr>
+        <th>Year Married</th>
+        <td>{{ registered.year_married }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  {% if registered.has_confirmed_attendance %}
+    <div class="alert alert-info mt-3">
+      ✅ Thank you for confirming your attendance!!!
+    </div>
+  {% else %}
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success">Yes, We Will Be Present</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

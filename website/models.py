@@ -1,22 +1,41 @@
 from django.db import models
-
+import uuid
+from django.contrib.auth.models import User
 
 class Registered(models.Model):
-	timestamp = models.CharField('Timestamp', max_length=120, null=True)
-	s_name = models.CharField('Surname', max_length=120, null=True)
-	f_name_m = models.CharField('Firstname Male', max_length=120, null=True)
-	phone_no_m = models.CharField('Phone Number Male', max_length=40, null=True)
-	email_m = models.EmailField('Email Male', null=True)
-	f_name_f = models.CharField('Firstname Female', max_length=120, null=True)
-	phone_no_f = models.CharField('Phone Number Female', max_length=40, null=True)
-	email_f = models.EmailField('Email Female', null=True)
-	no_of_years_married = models.CharField('Number of Years married', max_length=5, null=True)
-	attended_previous = models.CharField('Attended Previous version?', max_length=120, null=True)
-	how_heard_about_program = models.CharField('How you heard about program', max_length=120, null=True, blank=True)
-	means_of_communication = models.CharField('Preferred means of communication', max_length=120, blank=True, null=True)
-	comments = models.TextField(blank=True, null=True)
-	present = models.CharField('Attendance', max_length=100, null=True)
+    unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    labourer = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        limit_choices_to={'is_staff': True},
+        related_name='assigned_couples'
+    )
+    s_name = models.CharField('Surname', max_length=120, null=False)
+    f_name_m = models.CharField('Husband\'s First Name', max_length=120, null=False)
+    phone_no_m = models.CharField('Husband\'s Phone Number', max_length=40, unique=True, null=False)
+    email_m = models.EmailField('Husband\'s Email', null=True, blank=True, unique=False)
+    f_name_f = models.CharField('Wife\'s First Name', max_length=120, null=False)
+    phone_no_f = models.CharField('Wife\'s Phone Number', max_length=40, unique=True, null=False)
+    email_f = models.EmailField('Wife\'s Email', null=True, blank=True, unique=False)
+    year_married = models.IntegerField('Year Married', null=False)
+    attended_previous = models.CharField('Attended Previous Version?', max_length=3, choices=[('Yes', 'Yes'), ('No', 'No')], null=False)
+    how_heard_about_program = models.CharField('How You Heard About Program', max_length=255, null=False)
+    comments = models.TextField('Comments', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    has_downloaded_tag = models.BooleanField(default=False)
+    has_confirmed_attendance = models.BooleanField(default=False)
+    is_present = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.s_name
 
-	def __str__(self):
-		return self.s_name
+class Resource(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    link = models.URLField()
+
+    def __str__(self):
+        return self.name

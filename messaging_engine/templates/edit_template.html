@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+<div class="container">
+<br/><br/><br/>
+ <h1>Edit Template</h1>
+    <form method="POST" action="">
+      {% csrf_token %}
+      <div class="mb-3">
+        <h5><label for="messageTitle" class="form-label">Message Title:</label></h5>
+        <input type="text" class="form-control" id="messageTitle" aria-label="Search" placeholder="Enter Message Title" name="messageTitle" required>
+      </div>
+      <div class="mb-3">
+        <h5><label for="messageSubject" class="form-label">Message Subject</label></h5>
+        <input type="text" class="form-control" id="messageSubject" aria-label="Search" placeholder="Enter Message Subject" name="messageSubject" required>
+      </div>
+      <div class="mb-3">
+        <h5><label for="messageContentSMS" class="form-label">Message Content (SMS)</label></h5>
+          <textarea class="form-control" id="messageContentSMS" aria-label="Search" placeholder="Enter Message Content" name="messageContent" rows="5" required> </textarea>
+      </div>
+      <div class="mb-3">
+        <h5><label for="messageContent" class="form-label">Message Content (Email and WhatsApp)</label></h5>
+          <textarea class="form-control" id="messageContent" aria-label="Search" placeholder="Enter Message Content" name="messageContent" rows="5" required> </textarea>
+      </div>
+      <br/>
+      <button type="submit" class="btn btn-warning">New</button>
+      <button type="submit" class="btn btn-warning">Save</button>
+      <button type="submit" class="btn btn-warning">Delete</button>
+    </form>
+    <script>
+    // Initialize TinyMCE for the textarea
+    tinymce.init({
+      selector: '#messageContent',
+      height: 300,
+      plugins: 'link image code lists',
+      toolbar: 'undo redo | bold italic underline | bullist numlist | link image | code',
+    });
+  </script>
+    <br><br>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Message Title</th>
+          <th scope="col">Message Subject</th>
+          <th scope="col">Edit?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">1</th>
+          <td>Message to everyone to confirm attendance</td>
+          <td>Confirm Attendance</td>
+            <td><button type="button" class="btn btn-outline-warning">Edit</button></td>
+        </tr>
+        <tr>
+          <th scope="row">2</th>
+          <td>Message to everyone to download tag</td>
+          <td>Download Tag</td>
+            <td><button type="button" class="btn btn-outline-warning">Edit</button></td>
+        </tr>
+        <tr>
+          <th scope="row">3</th>
+          <td>Message to remind everyone about the program</td>
+          <td>2025 Couples Retreat Reminder</td>
+            <td><button type="button" class="btn btn-outline-warning">Edit</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+</div>
+{% endblock %}

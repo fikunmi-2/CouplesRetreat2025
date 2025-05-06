@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Assign Couples to Labourers</h2>
+
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search by surname" value="{{ request.GET.search }}">
+            <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </div>
+    </form>
+
+    {% if search_query %}
+        <h4>Search Results for "{{ search_query }}"</h4>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="search_mode" value="1">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>S/N</th>
+                        <th>Couple</th>
+                        <th>Labourer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for couple in search_results %}
+                        <tr>
+                            <td><input type="checkbox" name="couple_ids" value="{{ couple.id }}"></td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ couple.s_name }}: {{ couple.f_name_m }} & {{ couple.f_name_f }}</td>
+                            <td>
+                                {% if couple.labourer %}
+                                    {{ couple.labourer.username }}
+                                {% else %}
+                                    Unassigned
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4">No couples found with that surname.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        <div class="mb-3">
+            <label for="labourer_id" class="form-label">Select Labourer</label>
+            <select name="labourer_id" id="labourer_id" class="form-select" required>
+                <option value="">-- Choose Labourer --</option>
+                {% for labourer in labourers %}
+                    <option value="{{ labourer.id }}">{{ labourer.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" name="manual_assign" class="btn btn-primary mt-2">Assign Selected Couples</button>
+        </form>
+
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <button type="submit" name="auto_assign" class="btn btn-success">Auto-Assign Couples</button>
+    </form>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="labourer_id" class="form-label">Select Labourer</label>
+            <select name="labourer_id" id="labourer_id" class="form-select" required>
+                <option value="">-- Choose Labourer --</option>
+                {% for labourer in labourers %}
+                    <option value="{{ labourer.id }}">{{ labourer.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <h4>Unassigned Couples</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>S/N</th>
+                    <th>Couple</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for couple in unassigned %}
+                    <tr>
+                        <td><input type="checkbox" name="couple_ids" value="{{ couple.id }}"></td>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ couple.s_name }}: {{ couple.f_name_m }} & {{ couple.f_name_f }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="3">No unassigned couples.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4 class="mt-5">Assigned Couples</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>S/N</th>
+                    <th>Couple</th>
+                    <th>Current Labourer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for couple in assigned %}
+                    <tr>
+                        <td><input type="checkbox" name="couple_ids" value="{{ couple.id }}"></td>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ couple.s_name }}: {{ couple.f_name_m }} & {{ couple.f_name_f }}</td>
+                        <td>{{ couple.labourer.username }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4">No assigned couples.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="submit" name="manual_assign" class="btn btn-primary mt-3">Assign Selected Couples</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <h2>Superuser + Labourer</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Couples Assigned</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in both %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <a href="{% url 'view_labourer_couples' user.id %}" class="btn btn-link">
+                            {{ user.assigned_couples.count }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'edit_user' user.id %}" class="btn btn-sm btn-primary">Edit</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5">No users found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="mt-5">Superusers Only</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in superusers_only %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <a href="{% url 'edit_user' user.id %}" class="btn btn-sm btn-primary">Edit</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4">No users found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="mt-5">Labourers Only</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Couples Assigned</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in labourers_only %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <a href="{% url 'view_labourer_couples' user.id %}" class="btn btn-link">
+                            {{ user.assigned_couples.count }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'edit_user' user.id %}" class="btn btn-sm btn-primary">Edit</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5">No users found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}

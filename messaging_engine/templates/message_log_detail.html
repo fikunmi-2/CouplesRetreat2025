@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <br/><br/><br/><br/>
+<div class="container mt-4">
+    <h2>Message Log Details</h2>
+    <p><strong>Recipient:</strong> {{ log.recipient.s_name }}</p>
+    <p><strong>Phone Number:</strong> {{ log.phone_number }}</p>
+    <p><strong>Channel:</strong> {{ log.channel }}</p>
+    <p><strong>Status:</strong> <span class="{% if log.status == 'Success' %}text-success{% else %}text-danger{% endif %}">{{ log.status }}</span></p>
+    <p><strong>Message Content:</strong></p>
+    <pre>{{ log.message_content }}</pre>
+
+    <p><strong>Response Data:</strong></p>
+    <pre>{{ response_data_json }}</pre>
+
+    <a href="{% url 'message_detail' log.message.id %}">Back to Messages</a><br/><br/>
+</div>
+{% endblock %}

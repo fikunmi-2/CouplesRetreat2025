@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <br><br>
+            <h2 class="mb-4">Download Your Tag</h2>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <p><strong>S/N:</strong> {{ registered.id }}</p>
+                    <p><strong>Surname:</strong> {{ registered.s_name }}</p>
+                    <p><strong>Husband's Name:</strong> {{ registered.f_name_m }}</p>
+                    <p><strong>Wife's Name:</strong> {{ registered.f_name_f }}</p>
+                    <p><strong>Year Married:</strong> {{ registered.year_married }}</p>
+                </div>
+            </div>
+
+            <a class="btn btn-primary" href="{% url 'pdf_registee' registered.unique_id %}">
+                Download Tag
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

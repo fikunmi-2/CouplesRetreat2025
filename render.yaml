@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: couples-retreat-2025
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn retreat.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CELERY_BROKER_URL
+        sync: false
+      - key: CELERY_RESULT_BACKEND
+        sync: false
+      - key: SMARTSMS_API_URL
+        sync: false
+      - key: SMARTSMS_API_KEY
+        sync: false
+      - key: SMARTSMS_SENDER_ID
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: AWS_SES_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SES_SECRET_ACCESS_KEY
+        sync: false
+      - key: SENDER_EMAIL
+        sync: false
+

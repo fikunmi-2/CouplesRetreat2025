@@ -3,21 +3,93 @@
 
 
 {% block content %}
-  <br/><br/><br/><br/><br/>
-  <div class="container">
-  <form class="d-flex" role="search" method="POST">
+<div class="container mt-4">
+    <div class="row text-center mb-4">
+      <div class="col-md-3">
+        <div class="card border-primary shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Total Registered</h5>
+            <p class="card-text display-6">{{ total_count }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-success shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Downloaded Tag</h5>
+            <p class="card-text display-6">{{ tag_downloaded_count }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-info shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Confirmed Attendance</h5>
+            <p class="card-text display-6">{{ confirmed_attendance_count }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-warning shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Present</h5>
+            <p class="card-text display-6">{{ present_count }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <h2 class="mb-4 text-center">Hi {{ request.user.username }}, Registered Couples</h2>
+  <!-- Search Section -->
+  <form method="POST" id="searchForm" class="d-flex flex-wrap gap-2 mb-4">
     {% csrf_token %}
-        <input class="form-control me-2" type="search" placeholder="{{ search }}" aria-label="Search" name="searched" required>
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-  </div>
-  <br/><br/>
-  <center><h1>Registered Participants</h1></center>
+
+      <label for="filter_field"></label>
+      <select name="filter_field" id="filter_field" class="form-select" required>
+      <option value="s_name" selected>Surname</option>
+      <option value="f_name_m">Husband's First Name</option>
+      <option value="phone_no_m">Husband's Phone Number</option>
+      <option value="email_m">Husband's Email</option>
+      <option value="f_name_f">Wife's First Name</option>
+      <option value="phone_no_f">Wife's Phone Number</option>
+      <option value="email_f">Wife's Email</option>
+      <option value="year_married">Year Married</option>
+      <option value="attended_previous">Attended Previous Version?</option>
+      <option value="how_heard_about_program">How You Heard About Program</option>
+      <option value="has_downloaded_tag">Has Downloaded Tag</option>
+      <option value="has_confirmed_attendance">Has Confirmed Attendance</option>
+      <option value="is_present">Will Be Present</option>
+    </select>
+
+      <label for="filter_operator"></label>
+      <select name="filter_operator" id="filter_operator" class="form-select" required></select>
+
+    <div id="filter_value_container">
+        <input class="form-control" type="text" name="filter_value" id="filter_value" placeholder="Enter value" required>
+    </div>
+
+    <button type="submit" id="searchButton" class="btn btn-success" disabled>Search</button>
+  </form>
+
+  {% if searched %}
+    <p class="text-center"><strong>Search Result:</strong> {{ search }}</p>
+  {% endif %}
+
+  {% if searched and not registered_list %}
+    <p class="text-center text-danger">🚫 No records found matching the search.</p>
+  {% endif %}
+
+  {% if searched %}
+    <div class="text-center mt-3">
+      <a href="{% url 'view-registered' %}" class="btn btn-outline-secondary">🔙 Back to full list</a>
+    </div>
+  {% endif %}
+
 
 <table class="table table-Secondary table-striped table-hover">
   <thead>
     <tr>
-      <th scope="col">ID</th>
+      <th scope="col">S/N</th>
       <th scope="col">Last Name</th>
       <th scope="col">First Name</th>
       <th scope="col">Phone Number</th>
@@ -25,7 +97,9 @@
       <th scope="col">First Name</th>
       <th scope="col">Phone Number</th>
       <th scope="col">Email Address</th>
-      <th scope="col">Attendance</th>
+      <th scope="col">Downloaded Tag?</th>
+      <th scope="col">Confirmed Att?</th>
+      <th scope="col">Present?</th>
       <th scope="col">Action</th>
     </tr>
   </thead>
@@ -34,48 +108,141 @@
     {% for user in registered_list%}
     <tr>
       <th scope="row">{{ user.id }}</th>
-      <td><a href="{% url 'update_registee' user.id %}">{{ user.s_name }}</a></td>
+      <td><a href="{% url 'view_registee' user.unique_id %}">{{ user.s_name }}</a></td>
       <td>{{ user.f_name_m }}</td>
       <td>{{ user.phone_no_m }}</td>
       <td>{{ user.email_m }}</td>
       <td>{{ user.f_name_f }}</td>
       <td>{{ user.phone_no_f }}</td>
       <td>{{ user.email_f }}</td>
-      <td>{{ user.present }}</td>
-      <td><div class="dropdown">
-          <a class="btn btn-outline-warning dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Action</a>
-
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'update_registee' user.id %}">Update Record</a></li>
-            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete Record</a></li>
-            <li><a class="dropdown-item" href="{% url 'pdf_registee' user.id %}">Download Tag</a></li>
-            <li><a class="dropdown-item" href="{% url 'show_registee' user.id %}">Confirm Attend...</a></li>
-          </ul>
-        </div>
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Delete Record for {{ user.s_name }}</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  Are you sure you want to permanently delete this record?
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                  <button type="button" class="btn btn-danger" name="yes"><a href="{% url 'delete_registee' user.id %}">Yes</a></button>
-                </div>
-              </div>
+      <td>{{ user.has_downloaded_tag|yesno:"Yes ✅,No ❌" }}</td>
+      <td>{{ user.has_confirmed_attendance|yesno:"Yes ✅,No ❌" }}</td>
+      <td>{{ user.is_present|yesno:"Yes ✅,No ❌" }}</td>
+      <td>
+            <div class="dropdown">
+                <a class="btn btn-outline-warning dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Action</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'update_registee' user.unique_id %}">Update Record</a></li>
+                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal{{ user.id }}">Delete Record</a></li>
+                    <li><a class="dropdown-item" href="{% url 'pdf_registee' user.unique_id %}">Download Tag</a></li>
+                    <li><a class="dropdown-item" href="{% url 'confirm_attendance' user.s_name user.unique_id %}">Confirm Attendance</a></li>
+                    <li><a class="dropdown-item" href="{% url 'mark_present' user.unique_id %}">Mark Present</a></li>
+                </ul>
             </div>
-          </div>
-      </td>
+
+            <!-- Unique Delete Modal for each user -->
+            <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ user.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel{{ user.id }}">Delete Record for {{ user.s_name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to permanently delete this record?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                            <a href="{% url 'delete_registee' user.unique_id %}" class="btn btn-danger">Yes</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
     </tr>
-    
+
     {% endfor %}
   </tbody>
 </table>
-  
+</div>
 
-      
-    {% endblock %}
+<!-- JavaScript Section -->
+<script>
+  const fieldTypeMap = {
+    s_name: "text",
+    f_name_m: "text",
+    phone_no_m: "text",
+    email_m: "text",
+    f_name_f: "text",
+    phone_no_f: "text",
+    email_f: "text",
+    year_married: "number",
+    attended_previous: "boolean_text",
+    how_heard_about_program: "text",
+    has_downloaded_tag: "boolean",
+    has_confirmed_attendance: "boolean",
+    is_present: "boolean"
+  };
+
+  const operatorMap = {
+    text: [
+      { value: "exact", label: "Equals (=)" },
+      { value: "icontains", label: "Contains" },
+      { value: "iexact", label: "Case-insensitive Equals" },
+      { value: "ne", label: "Not Equal (/=)" }
+    ],
+    number: [
+      { value: "exact", label: "Equals (=)" },
+      { value: "gt", label: "Greater Than (>)" },
+      { value: "lt", label: "Less Than (<)" },
+      { value: "gte", label: "Greater Than or Equal (>=)" },
+      { value: "lte", label: "Less Than or Equal (<=)" }
+    ],
+    boolean: [
+      { value: "true", label: "True (✅)" },
+      { value: "false", label: "False (❌)" }
+    ],
+    boolean_text: [
+      { value: "Yes", label: "Yes (✅)" },
+      { value: "No", label: "No (❌)" }
+    ]
+  };
+
+  const filterField = document.getElementById("filter_field");
+  const filterOperator = document.getElementById("filter_operator");
+  const filterValue = document.getElementById("filter_value");
+  const filterValueContainer = document.getElementById("filter_value_container");
+  const searchButton = document.getElementById("searchButton");
+
+  function updateSearchButton() {
+    const operatorValue = filterOperator.value;
+    const isBoolField = fieldTypeMap[filterField.value]?.startsWith("boolean");
+    const valueValid = isBoolField || filterValue.value.trim() !== "";
+    searchButton.disabled = !(filterField.value && operatorValue && valueValid);
+  }
+
+  filterField.addEventListener("change", () => {
+    const selectedField = filterField.value;
+    const fieldType = fieldTypeMap[selectedField];
+    filterOperator.innerHTML = '<option value="">-- Select operator --</option>';
+
+    const operators = operatorMap[fieldType] || [];
+    operators.forEach(op => {
+      const option = document.createElement("option");
+      option.value = op.value;
+      option.textContent = op.label;
+      filterOperator.appendChild(option);
+    });
+
+    if (fieldType === "boolean" || fieldType === "boolean_text") {
+      filterValueContainer.style.display = "none";
+      filterValue.required = false;
+    } else {
+      filterValueContainer.style.display = "block";
+      filterValue.type = fieldType === "number" ? "number" : "text";
+      filterValue.required = true;
+    }
+
+    updateSearchButton();
+  });
+
+  filterOperator.addEventListener("change", updateSearchButton);
+  filterValue.addEventListener("input", updateSearchButton);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    filterField.dispatchEvent(new Event("change"));
+  });
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Import Registered Couples from Excel</h2>
+
+    <div class="mb-3 text-end">
+        <a href="{% url 'export_registered_excel' %}" class="btn btn-outline-primary">Export All to Excel</a>
+    </div>
+
+    <div class="alert alert-info">
+        <h5>📌 Excel Upload Instructions:</h5>
+        <ul>
+            <li><strong>Accepted file type:</strong> .xlsx (Excel 2007+)</li>
+            <li><strong>Required columns (exact headers):</strong></li>
+            <ul>
+                {% for field in required_fields %}
+                    <li><code>{{ field }}</code></li>
+                {% endfor %}
+            </ul>
+        </ul>
+        <h6 class="mt-3">Validation Rules:</h6>
+        <ul>
+            <li><strong>Phone numbers:</strong> Must be Nigerian format and valid (formats like +234..., 234..., 080... are handled)</li>
+            <li><strong>Names:</strong> Internal spaces are converted to hyphens and capitalized</li>
+            <li><strong>Year Married:</strong> Must be between 1500 and 2025</li>
+            <li><strong>Attended Previous:</strong> Must be "Yes" or "No"</li>
+            <li><strong>How Heard About Program:</strong> One of Flyer, Friend, Church, Social Media, Other (fallback applied)</li>
+        </ul>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_file" class="form-label">Upload Excel File:</label>
+            <input type="file" name="file" id="id_file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success">Upload File</button>
+    </form>
+
+    {% if success_count %}
+        <div class="alert alert-success">
+            ✅ <strong>{{ success_count }}</strong> records were successfully imported.
+        </div>
+    {% endif %}
+
+    {% if error_rows %}
+        <div class="alert alert-danger">
+            ❌ <strong>{{ error_rows|length }}</strong> rows failed to import:
+            <ul>
+                {% for row, reason in error_rows %}
+                    <li><strong>Row {{ row }}:</strong>
+                        <pre>{{ reason }}</pre>
+                    </li>
+                {% endfor %}
+            </ul>
+            <a href="" class="btn btn-outline-secondary mt-3">Re-upload Another File</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

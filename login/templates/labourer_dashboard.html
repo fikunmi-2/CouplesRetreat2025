@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4 text-center">Hi {{ request.user.username }}, your assigned couples</h2>
+
+  <table class="table table-secondary table-striped table-hover">
+    <thead>
+      <tr>
+        <th scope="col">S/N</th>
+        <th scope="col">Last Name</th>
+        <th scope="col">First Name</th>
+        <th scope="col">Phone Number</th>
+        <th scope="col">First Name</th>
+        <th scope="col">Phone Number</th>
+        <th scope="col">Downloaded Tag?</th>
+        <th scope="col">Confirmed Att?</th>
+        <th scope="col">Present?</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for user in registered_list %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td><a href="{% url 'view_registee' user.unique_id %}">{{ user.s_name }}</a></td>
+        <td>{{ user.f_name_m }}</td>
+        <td>{{ user.phone_no_m }}</td>
+        <td>{{ user.f_name_f }}</td>
+        <td>{{ user.phone_no_f }}</td>
+        <td>{{ user.has_downloaded_tag|yesno:"Yes ✅,No ❌" }}</td>
+        <td>{{ user.has_confirmed_attendance|yesno:"Yes ✅,No ❌" }}</td>
+        <td>{{ user.is_present|yesno:"Yes ✅,No ❌" }}</td>
+        <td>
+          <div class="dropdown">
+            <a class="btn btn-outline-warning dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Action</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'update_registee' user.unique_id %}">Update Record</a></li>
+              <li><a class="dropdown-item" href="{% url 'pdf_registee' user.unique_id %}">Download Tag</a></li>
+              <li><a class="dropdown-item" href="{% url 'confirm_attendance' user.s_name user.unique_id %}">Confirm Attendance</a></li>
+              <li><a class="dropdown-item" href="{% url 'mark_present' user.unique_id %}">Mark Present</a></li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="10" class="text-center">No assigned couples found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

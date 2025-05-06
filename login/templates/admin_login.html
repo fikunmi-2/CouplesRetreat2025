@@ -1,26 +1,26 @@
 {% extends 'base.html' %}
 
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+  <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+    <h2 class="text-center mb-4">Admin Login</h2>
 
+    <form method="POST" action="">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="username" class="form-label">Username:</label>
+        <input type="text" name="username" id="username" class="form-control" placeholder="Enter your username" required>
+      </div>
 
-{% block content %}   
-<div class="container">
-<br/><br/><br/>
-<h1>Admin Login</h1>
-<br><br>
-<form action="", method=POST>
-  {% csrf_token %}
+      <div class="mb-3">
+        <label for="password" class="form-label">Password:</label>
+        <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
+      </div>
 
-<form>
-  <div class="mb-3">
-    <label for="formGroupExampleInput" class="form-label">Username</label>
-    <input type="search" class="form-control" id="formGroupExampleInput" aria-label="Search" placeholder="Username" name="username" required>
-  <div class="mb-3">
-    <label for="exampleInputPassword1" class="form-label">Password</label>
-    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" name="password" required>
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-primary">Login</button>
+      </div>
+    </form>
   </div>
-  <br>
-  <input type="submit" value="Login" class="btn btn-warning">
-  </form>
-
+</div>
 {% endblock %}
-

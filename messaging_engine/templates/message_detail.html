@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+
+    <br/><br/><br/><br/>
+
+    <div class="container">
+        <h1>{{ current_message.template.title }} - Message Logs</h1>
+
+        <h5>Status: {{ current_message.status }}</h5>
+        <h5>Delivery Method: {{ current_message.delivery_method }}</h5>
+        <h5>
+            Delivery Time:
+            {% if current_message.delivery_time == "scheduled" %}
+                {{ current_message.schedule_date }} at {{ current_message.schedule_time }}
+            {% else %}
+                {{ current_message.delivery_time }}
+            {% endif %}
+        </h5>
+
+
+        <h3>Message Logs:</h3>
+        <table class="table table-Secondary table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>Contact Info</th>
+                    <th>Channel</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in message_logs %}
+                    <tr>
+                        <td>{{ log.phone_number }}</td>
+                        <td>{{ log.channel }}</td>
+                        <td>
+                            <a href = " {% url 'message_log_detail' log.id %}"
+                               class="{% if log.status == 'Success' %}text-success{% else %}text-danger{% endif %}">
+                                {{ log.status }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if message_logs %}
+            <!-- Delete All Logs -->
+            <form action="{% url 'delete_logs' 'all' current_message.id %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete All Logs</button>
+            </form>
+
+            <!-- Delete Only Success Logs -->
+            <form action="{% url 'delete_logs' 'success' current_message.id %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning">Delete Success Logs</button>
+            </form>
+
+            <!-- Delete Only Failure Logs -->
+            <form action="{% url 'delete_logs' 'failure' current_message.id %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">Delete Failure Logs</button>
+            </form>
+            <br><br>
+        {% else %}
+            <h3 style="align-content: center" >No Logs Available!!!</h3>
+        {% endif %}
+    <a href="{% url 'message_dashboard' %}">Back to Message Dashboard</a><br><br>
+    </div>
+
+{% endblock %}

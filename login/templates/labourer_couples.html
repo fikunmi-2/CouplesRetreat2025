@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Couples Assigned to {{ labourer.username }}</h2>
+    <a href="{% url 'user_list' %}" class="btn btn-secondary mb-3">Back to User List</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Surname</th>
+                <th>Husband</th>
+                <th>Wife</th>
+                <th>Phone (H)</th>
+                <th>Phone (W)</th>
+                <th>Year Married</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for couple in couples %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ couple.s_name }}</td>
+                    <td>{{ couple.f_name_m }}</td>
+                    <td>{{ couple.f_name_f }}</td>
+                    <td>{{ couple.phone_no_m }}</td>
+                    <td>{{ couple.phone_no_f }}</td>
+                    <td>{{ couple.year_married }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7">No couples assigned to this labourer.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
