@@ -2,16 +2,8 @@ import json
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from django.test import RequestFactory
-
-from messaging_engine.views import send_message
 from .models import Registered, Resource
-from .forms import RegisterForm 
-from django.http import HttpResponseRedirect, FileResponse, Http404
-import io
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch 
-from reportlab.lib.pagesizes import letter
+from .forms import RegisterForm
 
 from openpyxl import load_workbook
 from django import forms
@@ -97,6 +89,7 @@ def registered(request):
             context['registered_list'] = queryset
             context['searched'] = True
             context['search'] = f"{field} {operator} '{value}'" if value else f"{field} = {operator}"
+            context['search_count'] = queryset.count()
         else:
             context['registered_list'] = []
             context['searched'] = True

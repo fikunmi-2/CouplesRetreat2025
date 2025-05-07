@@ -72,7 +72,7 @@
   </form>
 
   {% if searched %}
-    <p class="text-center"><strong>Search Result:</strong> {{ search }}</p>
+    <p class="text-center"><strong>Search Result:</strong> {{ search }} - Count: {{ search_count }}</p>
   {% endif %}
 
   {% if searched and not registered_list %}
