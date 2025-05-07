@@ -116,10 +116,26 @@ def assign_labourers(request):
 
     labourers = User.objects.filter(is_staff=True).order_by('username')
     search_query = request.GET.get('search')
-    search_results = None
+    year_operator = request.GET.get('year_operator')
+    year_value = request.GET.get('year_value')
+
+    search_results = Registered.objects.all()
 
     if search_query:
-        search_results = Registered.objects.filter(s_name__icontains=search_query).order_by('created_at')
+        search_results = search_results.filter(s_name__icontains=search_query)
+
+    if year_operator in ['gt', 'lt', 'eq'] and year_value:
+        try:
+            year_value = int(year_value)
+            lookup = {
+                'gt': 'year_married__gt',
+                'lt': 'year_married__lt',
+                'eq': 'year_married'
+            }[year_operator]
+            search_results = search_results.filter(**{lookup: year_value})
+        except ValueError:
+            messages.warning(request, "Invalid year input.")
+            search_results = None
 
     unassigned = Registered.objects.filter(labourer__isnull=True).order_by('created_at')
     assigned = Registered.objects.filter(labourer__isnull=False).order_by('created_at')
@@ -160,4 +176,6 @@ def assign_labourers(request):
         'assigned': assigned,
         'search_results': search_results,
         'search_query': search_query,
+        'year_operator': year_operator,
+        'year_value': year_value,
     })

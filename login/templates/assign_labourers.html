@@ -8,10 +8,43 @@
             <input type="text" name="search" class="form-control" placeholder="Search by surname" value="{{ request.GET.search }}">
             <button class="btn btn-outline-secondary" type="submit">Search</button>
         </div>
+    
+
+    <div class="input-group mt-3">
+        <label class="input-group-text" for="year_operator">Year Married</label>
+        <select class="form-select" name="year_operator" id="year_operator">
+            <option value="">-- Choose Operator --</option>
+            <option value="gt" {% if year_operator == "gt" %}selected{% endif %}>After</option>
+            <option value="lt" {% if year_operator == "lt" %}selected{% endif %}>Before</option>
+            <option value="eq" {% if year_operator == "eq" %}selected{% endif %}>Exactly</option>
+        </select>
+        <input type="number" class="form-control" name="year_value" placeholder="e.g. 2015" value="{{ request.GET.year_value }}">
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+    </div>
     </form>
 
-    {% if search_query %}
-        <h4>Search Results for "{{ search_query }}"</h4>
+    <a href="{% url 'assign_labourers' %}" class="btn btn-link">Clear Filters</a>
+
+    {% if search_query or year_value %}
+        <h5>Search Results:</h5>
+        <ul>
+            {% if search_query %}
+                <li>Couple's surname contains: "{{ search_query }}"</li>
+            {% endif %}
+            {% if year_operator and year_value %}
+                <li>
+                    Year Married
+                    {% if year_operator == "gt" %} > 
+                    {% elif year_operator == "lt" %} < 
+                    {% elif year_operator == "eq" %} = 
+                    {% endif %}
+                    {{ year_value }}
+                </li>
+            {% endif %}
+        </ul>
+    {% endif %}
+
+    {% if search_query or year_value %}
         <form method="post">
             {% csrf_token %}
             <input type="hidden" name="search_mode" value="1">

@@ -120,9 +120,6 @@
             <a class="nav-link {% if request.resolver_match.url_name == 'manage_resources' %}active{% endif %}" href="{% url 'manage_resources' %}">Manage Resources</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" href="{% url 'register' %}">Register</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}" href="{% url 'user_list' %}">Users</a>
           </li>
           <li class="nav-item">
@@ -151,10 +148,17 @@
           <a class="nav-link" href="{% url 'admin_logout' %}">Logout</a>
         </li>
 
+      <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" href="{% url 'register' %}">Register</a>
+      </li>
+
       {% else %}
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
         </li>
+          <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" href="{% url 'register' %}">Register</a>
+      </li>
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'admin_login' %}active{% endif %}" href="{% url 'admin_login' %}">Login</a>
         </li>

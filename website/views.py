@@ -98,23 +98,11 @@ def registered(request):
     return render(request, 'viewregistered.html', context)
 
 
-@staff_or_superuser_required
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             registered_user = form.save()
-            # factory = RequestFactory()
-            # send_request = factory.post("/send_message", {
-            #     "template_id": 1,
-            #     "recipient_id": registered_user.id,
-            #     "recipientSource": "db",
-            #     "delivery_method": json.dumps(["SMS", "WhatsApp", "Email"]),
-            #     "delivery_time": "immediate",
-            # })
-            #
-            # send_request.user = request.user  # Assign the user session if needed
-            # send_message(send_request)  # Call the function
             return redirect('thank_you', registered_user.unique_id)
     else:
         form = RegisterForm()
