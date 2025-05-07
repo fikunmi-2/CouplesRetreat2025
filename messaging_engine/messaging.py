@@ -78,8 +78,7 @@ def send_email(recipient, message_text, message_obj):
     ses_client = boto3.client('ses', region_name='us-east-1', aws_access_key_id=settings.AWS_SES_ACCESS_KEY_ID,
     aws_secret_access_key=settings.AWS_SES_SECRET_ACCESS_KEY)
 
-    # sender_email = "Couples Retreat 2025 <contact@couplesretreatseries.com>"
-    sender_email = "Couples Retreat 2025 <fikunmi.aluko@gmail.com>"
+    sender_email = SENDER_EMAIL
     subject = message_obj.template.title
 
     # Collect recipient emails

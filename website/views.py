@@ -160,60 +160,93 @@ def pdf_registee(request, unique_id):
     from PIL import Image
     import io
     from reportlab.pdfgen import canvas
-    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import cm
+    from reportlab.lib.utils import ImageReader
     from django.http import FileResponse
 
     reg_couple = Registered.objects.get(unique_id=unique_id)
 
+    # Page size
+    page_width, page_height = A4
+
+    # Tag size
+    tag_width = 8.8 * cm
+    tag_height = 12.4 * cm
+
+    # Horizontal positioning: side-by-side with spacing
+    x_left = (page_width - (2 * tag_width + 1 * cm)) / 2
+    x_right = x_left + tag_width + 1 * cm
+
+    # Vertical positioning: both tags on the top half with margin
+    top_margin = 3.3 * cm
+    y_position = page_height - tag_height - top_margin
+
+    # Prepare canvas
     buf = io.BytesIO()
-    c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
+    c = canvas.Canvas(buf, pagesize=A4)
 
-    # Draw background
-    image_path = 'static/download-tag-background.png'  # Make sure this path is correct
-    c.drawImage(image_path, 0, -5, width=None, height=None, mask=None)
+    # Load background image
+    image_path = 'static/tag_background.png'
+    bg_image = Image.open(image_path).convert("RGB")
+    bg_resized = bg_image.resize((int(tag_width), int(tag_height)))
+    bg_io = io.BytesIO()
+    bg_resized.save(bg_io, format='PNG')
+    bg_io.seek(0)
+    bg_reader = ImageReader(bg_io)
 
-    # Generate QR code in memory
+    # Generate QR code
     qr_data = request.build_absolute_uri(f"/mark_present/{reg_couple.unique_id}")
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
     qr.add_data(qr_data)
     qr.make(fit=True)
-    img = qr.make_image(fill_color='black', back_color='white')
-
-    # Save QR image to in-memory buffer
+    qr_img = qr.make_image(fill_color='black', back_color='white')
     qr_io = io.BytesIO()
-    img.save(qr_io, format='PNG')
+    qr_img.save(qr_io, format='PNG')
     qr_io.seek(0)
-    qr_image = Image.open(qr_io)
+    qr_reader = ImageReader(qr_io)
 
-    # Draw QR image twice
-    c.drawInlineImage(qr_image, 185, 125, width=30, height=30)
-    c.drawInlineImage(qr_image, 185, 345, width=30, height=30)
+    # Define two side-by-side tag positions
+    positions = [
+        {"x": x_left, "y": y_position, "name": reg_couple.f_name_f.upper()},
+        {"x": x_right, "y": y_position, "name": reg_couple.f_name_m.upper()}
+    ]
 
-    # Text content
-    c.setFont("Times-Bold", 12)
+    for pos in positions:
+        # Draw background
+        c.drawImage(bg_reader, pos["x"], pos["y"], width=tag_width, height=tag_height)
 
-    c.drawString(73, 150, reg_couple.s_name.lower())
-    c.drawString(73, 165, reg_couple.f_name_m.upper())
+        # Draw black border
+        c.setStrokeColorRGB(0, 0, 0)
+        c.rect(pos["x"], pos["y"], tag_width, tag_height)
 
-    c.setFillColorRGB(1, 0, 0)  # Red
-    c.drawString(230, 175, str(reg_couple.id))  # Use unique_id instead of ID
+        center_x = pos["x"] + tag_width / 2
+        content_start_y = pos["y"] + 4.4 * cm  # vertical start inside tag
 
-    c.setFillColorRGB(0, 0, 0)  # Back to black
-    c.drawString(73, 370, reg_couple.s_name.lower())
-    c.drawString(73, 385, reg_couple.f_name_f.upper())
+        # Draw surname
+        c.setFont("Times-Bold", 18)
+        c.setFillColorRGB(0, 0, 0)
+        c.drawCentredString(center_x, content_start_y, reg_couple.s_name.lower())
 
-    c.setFillColorRGB(1, 0, 0)
-    c.drawString(230, 393, str(reg_couple.id))
+        # Draw first name
+        c.drawCentredString(center_x, content_start_y - 0.6 * cm, pos["name"])
+
+        # Draw QR code
+        qr_size = 2.8 * cm
+        qr_x = center_x - qr_size / 2
+        qr_y = content_start_y - 4.0 * cm
+        c.drawImage(qr_reader, qr_x, qr_y, width=qr_size, height=qr_size)
 
     c.showPage()
     c.save()
     buf.seek(0)
 
-    # Mark as User downloaded their tag
     reg_couple.has_downloaded_tag = True
     reg_couple.save()
 
     return FileResponse(buf, as_attachment=True, filename=f'{reg_couple.s_name}.pdf')
+
+
 
 def download_tag(request, surname, unique_id):
     reg_couple = get_object_or_404(Registered, s_name__iexact=surname, unique_id=unique_id)

@@ -180,7 +180,7 @@ def send_message(request):
             else:
                 # Send immediately
                 print(f"Immediate message for: {message.template.title} (Nigeria Time)")
-                send_immediate_message.apply_async(args=[message.id])
+                send_immediate_message(message.id)
 
             message.status = "Received"
             message.save()
