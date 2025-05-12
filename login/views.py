@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -5,7 +6,16 @@ from django.shortcuts import render, redirect
 from .forms import *
 from django.contrib.auth.models import User
 from website.models import Registered
+from functools import wraps
 
+def staff_or_superuser_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated or not (request.user.is_staff or request.user.is_superuser):
+            messages.warning(request, "You do not have permission to access this page.")
+            return redirect('admin_login')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
 def admin_login(request):
     if request.method == "POST":
         username = request.POST['username']
@@ -108,6 +118,20 @@ def labourer_dashboard(request):
     return render(request, "labourer_dashboard.html", {
         "registered_list": registered_list
     })
+
+@staff_or_superuser_required
+def add_note(request, unique_id):
+    if request.method == "POST":
+        note = request.POST.get("note", "")
+        couple = get_object_or_404(Registered, unique_id=unique_id)
+
+        if request.user != couple.labourer and not request.user.is_superuser:
+            return JsonResponse({"success": False, "error": "Permission denied."})
+
+        couple.labourer_note = note
+        couple.save()
+
+        return JsonResponse({"success": True})
 
 def assign_labourers(request):
     if not request.user.is_superuser:

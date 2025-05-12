@@ -10,5 +10,6 @@ urlpatterns = [
     path('assign_labourers', views.assign_labourers, name="assign_labourers"),
     path('labourers/<int:user_id>/couples/', views.view_labourer_couples, name='view_labourer_couples'),
     path('labourer_dashboard', views.labourer_dashboard, name='labourer_dashboard'),
+    path('add_note/<uuid:unique_id>/', views.add_note, name='add_note'),
 
 ]

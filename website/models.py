@@ -28,6 +28,7 @@ class Registered(models.Model):
     has_downloaded_tag = models.BooleanField(default=False)
     has_confirmed_attendance = models.BooleanField(default=False)
     is_present = models.BooleanField(default=False)
+    labourer_note = models.TextField("Labourer Note", blank=True)
 
     def __str__(self):
         return self.s_name

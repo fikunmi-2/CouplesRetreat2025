@@ -7,16 +7,16 @@
   <table class="table table-secondary table-striped table-hover">
     <thead>
       <tr>
-        <th scope="col">S/N</th>
-        <th scope="col">Last Name</th>
-        <th scope="col">First Name</th>
-        <th scope="col">Phone Number</th>
-        <th scope="col">First Name</th>
-        <th scope="col">Phone Number</th>
-        <th scope="col">Downloaded Tag?</th>
-        <th scope="col">Confirmed Att?</th>
-        <th scope="col">Present?</th>
-        <th scope="col">Action</th>
+        <th>S/N</th>
+        <th>Last Name</th>
+        <th>First Name (M)</th>
+        <th>Phone (M)</th>
+        <th>First Name (F)</th>
+        <th>Phone (F)</th>
+        <th>Downloaded Tag?</th>
+        <th>Confirmed Att?</th>
+        <th>Present?</th>
+        <th>Actions</th>
       </tr>
     </thead>
 
@@ -34,20 +34,73 @@
         <td>{{ user.is_present|yesno:"Yes ✅,No ❌" }}</td>
         <td>
           <div class="dropdown">
-            <a class="btn btn-outline-warning dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Action</a>
+            <a class="btn btn-outline-warning dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Action</a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'update_registee' user.unique_id %}">Update Record</a></li>
               <li><a class="dropdown-item" href="{% url 'pdf_registee' user.unique_id %}">Download Tag</a></li>
               <li><a class="dropdown-item" href="{% url 'confirm_attendance' user.s_name user.unique_id %}">Confirm Attendance</a></li>
               <li><a class="dropdown-item" href="{% url 'mark_present' user.unique_id %}">Mark Present</a></li>
+              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#noteModal{{ user.id }}">Add/View Note</a></li>
             </ul>
           </div>
         </td>
       </tr>
+
+      <!-- Note Modal -->
+      <div class="modal fade" id="noteModal{{ user.id }}" tabindex="-1" aria-labelledby="noteModalLabel{{ user.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form method="post" onsubmit="submitNote(event, '{{ user.unique_id }}')">
+              <div class="modal-header">
+                <h5 class="modal-title">Note for {{ user.s_name }}: {{ user.f_name_m }} & {{ user.f_name_f }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                {% csrf_token %}
+                <textarea class="form-control" name="note" id="noteText{{ user.unique_id }}" rows="4">{{ user.labourer_note }}</textarea>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save Note</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
       {% empty %}
       <tr><td colspan="10" class="text-center">No assigned couples found.</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
+
+<!-- JS to handle AJAX note submission -->
+<script>
+function submitNote(event, uniqueId) {
+  event.preventDefault();
+  const textarea = document.getElementById("noteText" + uniqueId);
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  fetch(`/login/add_note/${uniqueId}/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRFToken": csrfToken,
+    },
+    body: new URLSearchParams({
+      note: textarea.value,
+    }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert("Note saved successfully.");
+      const modalEl = document.getElementById("noteModal" + uniqueId);
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      modal.hide();
+    } else {
+      alert("Error: " + (data.error || "Could not save note."));
+    }
+  });
+}
+</script>
 {% endblock %}

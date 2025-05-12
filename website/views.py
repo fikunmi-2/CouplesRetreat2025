@@ -61,7 +61,7 @@ def get_registered_queryset_from_filter(filter_field, filter_operator, filter_va
 
 @superuser_required
 def registered(request):
-    registered_list = Registered.objects.all()
+    registered_list = Registered.objects.all().order_by("id")
 
     # Statistics
     total_count = registered_list.count()
