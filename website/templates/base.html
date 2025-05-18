@@ -101,37 +101,47 @@
         </li>
 
         {% if user.is_superuser %}
+          <!-- Messaging -->
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name in 'send_message view_templates message_template_create' %}active{% endif %}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Messaging</a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item {% if request.resolver_match.url_name == 'send_message' %}active{% endif %}" href="{% url 'send_message' %}">Send Message</a></li>
-              <li><a class="dropdown-item {% if request.resolver_match.url_name == 'view_templates' %}active{% endif %}" href="{% url 'view_templates' %}">View Templates</a></li>
-              <li><a class="dropdown-item {% if request.resolver_match.url_name == 'message_template_create' %}active{% endif %}" href="{% url 'message_template_create' %}">Message Template</a></li>
-              <li><a class="dropdown-item {% if request.resolver_match.url_name == 'message_dashboard' %}active{% endif %}" href="{% url 'message_dashboard' %}">Message Dashboard</a></li>
+            <a class="nav-link dropdown-toggle" href="#" id="msgDropdown" role="button" data-bs-toggle="dropdown">Messaging</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'send_message' %}">Send Message</a></li>
+              <li><a class="dropdown-item" href="{% url 'view_templates' %}">View Templates</a></li>
+              <li><a class="dropdown-item" href="{% url 'message_template_create' %}">Message Template</a></li>
+              <li><a class="dropdown-item" href="{% url 'message_dashboard' %}">Message Dashboard</a></li>
             </ul>
           </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'view-registered' %}active{% endif %}" href="{% url 'view-registered' %}">View Couples</a>
+
+          <!-- Couples -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="couplesDropdown" role="button" data-bs-toggle="dropdown">Couples</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'view-registered' %}">View Couples</a></li>
+              <li><a class="dropdown-item" href="{% url 'view_comments' %}">View Comments</a></li>
+              <li><a class="dropdown-item" href="{% url 'labourer_notes' %}">Labourer Notes</a></li>
+              <li><a class="dropdown-item" href="{% url 'assign_labourers' %}">Assign Labourers</a></li>
+            </ul>
           </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'view_comments' %}active{% endif %}" href="{% url 'view_comments' %}">View Comments</a>
+
+          <!-- Data & Resources -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dataDropdown" role="button" data-bs-toggle="dropdown">Data</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'manage_resources' %}">Manage Resources</a></li>
+              <li><a class="dropdown-item" href="{% url 'upload_registered_excel' %}">Import/Export</a></li>
+            </ul>
           </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'manage_resources' %}active{% endif %}" href="{% url 'manage_resources' %}">Manage Resources</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}" href="{% url 'user_list' %}">Users</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'create_user' %}active{% endif %}" href="{% url 'create_user' %}">Create Users</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'upload_registered_excel' %}active{% endif %}" href="{% url 'upload_registered_excel' %}">Import/Export</a>
-          </li>
-            <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'assign_labourers' %}active{% endif %}" href="{% url 'assign_labourers' %}">Assign Labourers</a>
+
+          <!-- Users -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">Users</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'user_list' %}">Users</a></li>
+              <li><a class="dropdown-item" href="{% url 'create_user' %}">Create Users</a></li>
+            </ul>
           </li>
         {% endif %}
+
 
         {% if user.is_staff %}
           <li class="nav-item">

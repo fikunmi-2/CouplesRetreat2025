@@ -16,6 +16,16 @@ def staff_or_superuser_required(view_func):
             return redirect('admin_login')
         return view_func(request, *args, **kwargs)
     return _wrapped_view
+
+def superuser_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_superuser:
+            messages.warning(request, "You do not have permission to access this page.")
+            return redirect('admin_login')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
 def admin_login(request):
     if request.method == "POST":
         username = request.POST['username']
@@ -132,6 +142,20 @@ def add_note(request, unique_id):
         couple.save()
 
         return JsonResponse({"success": True})
+
+@superuser_required
+def labourer_notes(request):
+    labourers = User.objects.filter(is_staff=True)
+    labourer_data = []
+
+    for labourer in labourers:
+        couples = Registered.objects.filter(labourer=labourer).order_by('s_name')
+        labourer_data.append({
+            'labourer': labourer,
+            'couples': couples
+        })
+
+    return render(request, 'labourer_notes.html', {'labourer_data': labourer_data})
 
 def assign_labourers(request):
     if not request.user.is_superuser:

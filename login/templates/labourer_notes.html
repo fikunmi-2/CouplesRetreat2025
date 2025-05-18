@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>All Labourer Notes</h2>
+
+  {% for entry in labourer_data %}
+    <h4 class="mt-5">Labourer: {{ entry.labourer.username }}</h4>
+
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>S/N</th>
+          <th>Couple (Surname)</th>
+          <th>Comment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for couple in entry.couples %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>
+            <a href="{% url 'view_registee' couple.unique_id %}">
+              {{ couple.s_name }} ({{ couple.f_name_m }} & {{ couple.f_name_f }})
+            </a>
+          </td>
+          <td>{{ couple.labourer_note|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">No assigned couples.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% empty %}
+    <p>No labourers found.</p>
+  {% endfor %}
+</div>
+{% endblock %}
