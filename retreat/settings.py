@@ -125,14 +125,22 @@ USE_I18N = True
 
 USE_TZ = True
 
-AWS_SES_ACCESS_KEY_ID = config('AWS_SES_ACCESS_KEY_ID')
-AWS_SES_SECRET_ACCESS_KEY = config('AWS_SES_SECRET_ACCESS_KEY')
+# AWS_SES_ACCESS_KEY_ID = config('AWS_SES_ACCESS_KEY_ID')
+# AWS_SES_SECRET_ACCESS_KEY = config('AWS_SES_SECRET_ACCESS_KEY')
 
 SMARTSMS_API_URL = config('SMARTSMS_API_URL')
 SMARTSMS_API_KEY = config('SMARTSMS_API_KEY')
 SMARTSMS_SENDER_ID = config('SMARTSMS_SENDER_ID')
 WHATSAPP_ACCESS_TOKEN = config('WHATSAPP_ACCESS_TOKEN')
 SENDER_EMAIL = config('SENDER_EMAIL')
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.ionos.com")
+EMAIL_PORT = config("EMAIL_PORT", cast=int, default=587)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=True)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default=f"Couples Retreat 2025 <{EMAIL_HOST_USER}>")
 
 
 # Static files (CSS, JavaScript, Images)

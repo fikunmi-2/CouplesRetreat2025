@@ -2,16 +2,18 @@
 import json
 
 import requests
-import boto3
 from django.conf import settings
+import time
 
 from messaging_engine.models import MessageLog
+from datetime import timedelta
+from django.utils.timezone import now
+from django.core.mail import send_mail
 
 SMARTSMS_API_URL = settings.SMARTSMS_API_URL
 SMARTSMS_API_KEY = settings.SMARTSMS_API_KEY
 SMARTSMS_SENDER_ID = settings.SMARTSMS_SENDER_ID
 WHATSAPP_ACCESS_TOKEN = settings.WHATSAPP_ACCESS_TOKEN
-SENDER_EMAIL = settings.SENDER_EMAIL
 
 def send_sms(recipient, message_obj, message_text):
     # Logic to send SMS
@@ -73,25 +75,33 @@ def send_sms(recipient, message_obj, message_text):
 
         print("SMS response_data: ", response_data)
 
+def emails_sent_today():
+    today = now().date()
+    return MessageLog.objects.filter(
+        channel="Email",
+        status="Success",
+        created_at__date=today
+    ).count()
+
+def emails_sent_last_hour():
+    one_hour_ago = now() - timedelta(hours=1)
+    return MessageLog.objects.filter(
+        channel="Email",
+        status="Success",
+        created_at__gte=one_hour_ago
+    ).count()
+
 def send_email(recipient, message_text, message_obj):
-    # Logic to send Email
-    ses_client = boto3.client('ses', region_name='us-east-1', aws_access_key_id=settings.AWS_SES_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SES_SECRET_ACCESS_KEY)
-
-    sender_email = SENDER_EMAIL
     subject = message_obj.template.title
-
-    # Collect recipient emails
+    from_email = settings.DEFAULT_FROM_EMAIL
     recipient_emails = [recipient.email_m, recipient.email_f]
-    recipient_emails = [email for email in recipient_emails if email]  # Remove empty emails
+    recipient_emails = [email for email in recipient_emails if email]
 
     if not recipient_emails:
-
-        # Log failure due to missing email addresses
         MessageLog.objects.create(
             recipient=recipient,
             message=message_obj,
-            phone_number="",  # Not applicable for email
+            phone_number="",
             message_content=message_text,
             channel="Email",
             status="Failure",
@@ -100,41 +110,45 @@ def send_email(recipient, message_text, message_obj):
         return
 
     for email in recipient_emails:
+        if emails_sent_today() >= 500:
+            print("Daily email limit reached. Halting.")
+            break
+
+        while emails_sent_last_hour() >= 100:
+            print("Hourly limit reached. Waiting 60 seconds...")
+            time.sleep(60)
+
         status = "Failure"
         response_data = {}
 
         try:
-            response = ses_client.send_email(
-                Source=sender_email,
-                Destination={'ToAddresses': [email]},
-                Message={
-                    'Subject': {'Data': subject},
-                    'Body': {
-                        'Html': {'Data': message_text},
-                        'Text': {'Data': message_text},
-                    },
-                }
+            print("DEFAULT_FROM_EMAIL:", settings.DEFAULT_FROM_EMAIL)
+            print("EMAIL_HOST_USER:", settings.EMAIL_HOST_USER)
+            print("EMAIL_HOST_PASSWORD:", settings.EMAIL_HOST_PASSWORD)
+            send_mail(
+                subject=subject,
+                message=message_text,
+                from_email=from_email,
+                recipient_list=[email],
+                html_message=message_text
             )
-
-            response_data = response
-            http_status = response["ResponseMetadata"]["HTTPStatusCode"]
-
-            if http_status == 200:
-                status = "Success"
-
+            status = "Success"
+            print(f"Email sent to {email}")
         except Exception as e:
             response_data = {"error": str(e)}
+            print(f"Error sending to {email}: {e}")
 
-        # Log message delivery attempt
         MessageLog.objects.create(
             recipient=recipient,
             message=message_obj,
-            phone_number=email,  # Store the email address used
+            phone_number=email,
             message_content=message_text,
             channel="Email",
             status=status,
             response_data=json.dumps(response_data),
         )
+
+        time.sleep(3)  # Pause between sends
 
 def send_whatsapp(recipient, message_text, message_obj):
     print(f"Sending WhatsApp to {recipient.s_name}: {message_text}")
@@ -290,3 +304,66 @@ def generate_message_for_recipient(template, user):
         "phone_number": user.phone_no_m,  # Add phone number for reference
         "email": user.email_m,  # Add email for reference
     }
+
+# def send_email(recipient, message_text, message_obj):
+#     # Logic to send Email
+#     ses_client = boto3.client('ses', region_name='us-east-1', aws_access_key_id=settings.AWS_SES_ACCESS_KEY_ID,
+#     aws_secret_access_key=settings.AWS_SES_SECRET_ACCESS_KEY)
+#
+#     sender_email = SENDER_EMAIL
+#     subject = message_obj.template.title
+#
+#     # Collect recipient emails
+#     recipient_emails = [recipient.email_m, recipient.email_f]
+#     recipient_emails = [email for email in recipient_emails if email]  # Remove empty emails
+#
+#     if not recipient_emails:
+#
+#         # Log failure due to missing email addresses
+#         MessageLog.objects.create(
+#             recipient=recipient,
+#             message=message_obj,
+#             phone_number="",  # Not applicable for email
+#             message_content=message_text,
+#             channel="Email",
+#             status="Failure",
+#             response_data=json.dumps({"error": "No valid email addresses available"}),
+#         )
+#         return
+#
+#     for email in recipient_emails:
+#         status = "Failure"
+#         response_data = {}
+#
+#         try:
+#             response = ses_client.send_email(
+#                 Source=sender_email,
+#                 Destination={'ToAddresses': [email]},
+#                 Message={
+#                     'Subject': {'Data': subject},
+#                     'Body': {
+#                         'Html': {'Data': message_text},
+#                         'Text': {'Data': message_text},
+#                     },
+#                 }
+#             )
+#
+#             response_data = response
+#             http_status = response["ResponseMetadata"]["HTTPStatusCode"]
+#
+#             if http_status == 200:
+#                 status = "Success"
+#
+#         except Exception as e:
+#             response_data = {"error": str(e)}
+#
+#         # Log message delivery attempt
+#         MessageLog.objects.create(
+#             recipient=recipient,
+#             message=message_obj,
+#             phone_number=email,  # Store the email address used
+#             message_content=message_text,
+#             channel="Email",
+#             status=status,
+#             response_data=json.dumps(response_data),
+#         )

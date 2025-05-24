@@ -180,7 +180,7 @@ def send_message(request):
             else:
                 # Send immediately
                 print(f"Immediate message for: {message.template.title} (Nigeria Time)")
-                send_immediate_message(message.id)
+                trigger_send_immediate_message(message.id)
 
             message.status = "Received"
             message.save()
@@ -194,6 +194,12 @@ def send_message(request):
         #     return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid HTTP method"}, status=405)
+
+import threading
+
+def trigger_send_immediate_message(message_id):
+    thread = threading.Thread(target=send_immediate_message, args=(message_id,))
+    thread.start()
 
 def get_registered_queryset_from_filter(filter_field, filter_operator, filter_value):
     try:

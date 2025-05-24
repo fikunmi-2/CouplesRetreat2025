@@ -86,7 +86,7 @@ def registered(request):
 
         queryset, error = get_registered_queryset_from_filter(field, operator, value)
         if queryset is not None:
-            context['registered_list'] = queryset
+            context['registered_list'] = queryset.order_by("id")
             context['searched'] = True
             context['search'] = f"{field} {operator} '{value}'" if value else f"{field} = {operator}"
             context['search_count'] = queryset.count()
