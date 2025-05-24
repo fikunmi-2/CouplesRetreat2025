@@ -127,7 +127,7 @@ def send_email(recipient, message_text, message_obj):
                 message=message_text,
                 from_email=from_email,
                 recipient_list=[email],
-                html_message=message_text
+                html_message=message_text,
             )
             status = "Success"
             print(f"Email sent to {email}")
@@ -277,6 +277,7 @@ def generate_message_for_recipient(template, user):
 
     # Define placeholders and values for this user
     placeholders = {
+        "{{unique_id}}": str(user.registered_ref),
         "{{s_name}}": user.s_name,
         "{{f_name_m}}": user.f_name_m,
         "{{phone_no_m}}": user.phone_no_m,
