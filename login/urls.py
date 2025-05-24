@@ -12,5 +12,4 @@ urlpatterns = [
     path('labourer_dashboard', views.labourer_dashboard, name='labourer_dashboard'),
     path('add_note/<uuid:unique_id>/', views.add_note, name='add_note'),
     path('labourer_notes/', views.labourer_notes, name='labourer_notes'),
-
 ]

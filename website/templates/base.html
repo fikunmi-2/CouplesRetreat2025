@@ -7,6 +7,7 @@
     <title>2025 Couples Retreat</title>
 
       <link rel="icon" type="image/png" href="{% get_static_prefix %}favicon.png?v=1">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
@@ -14,7 +15,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-    <!-- TinyMCE (if needed) -->
+    <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/07pt0nxfymsp3w3qtoyzf8kb9h78fdjdabwqkzk4jteyzya8/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 
     <style>
@@ -128,6 +129,7 @@
             <a class="nav-link dropdown-toggle" href="#" id="dataDropdown" role="button" data-bs-toggle="dropdown">Data</a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="{% url 'manage_resources' %}">Manage Resources</a></li>
+              <li><a class="dropdown-item" href="{% url 'seminar_admin_dashboard' %}">Manage Seminars</a></li>
               <li><a class="dropdown-item" href="{% url 'upload_registered_excel' %}">Import/Export</a></li>
             </ul>
           </li>
@@ -136,12 +138,11 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">Users</a>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="{% url 'user_list' %}">Users</a></li>
+              <li><a class="dropdown-item" href="{% url 'user_list' %}">View Users</a></li>
               <li><a class="dropdown-item" href="{% url 'create_user' %}">Create Users</a></li>
             </ul>
           </li>
         {% endif %}
-
 
         {% if user.is_staff %}
           <li class="nav-item">

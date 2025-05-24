@@ -2,8 +2,8 @@ import json
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Registered, Resource
-from .forms import RegisterForm
+from .models import Registered, Resource, Seminar
+from .forms import RegisterForm, SeminarForm
 
 from openpyxl import load_workbook
 from django import forms
@@ -144,30 +144,30 @@ def pdf_registee(request, unique_id):
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import cm
     from reportlab.lib.utils import ImageReader
-    from django.http import FileResponse
+    from django.http import FileResponse, HttpResponse
+    from django.contrib import messages
+    from django.shortcuts import redirect
 
     reg_couple = Registered.objects.get(unique_id=unique_id)
 
-    # Page size
-    page_width, page_height = A4
+    # Check if seminar is selected
+    if not reg_couple.seminar:
+        messages.warning(request, "You must register for a seminar before downloading your tag.")
+        return redirect('choose_seminar', unique_id=unique_id)
 
-    # Tag size
+    # Page setup
+    page_width, page_height = A4
     tag_width = 8.8 * cm
     tag_height = 12.4 * cm
-
-    # Horizontal positioning: side-by-side with spacing
     x_left = (page_width - (2 * tag_width + 1 * cm)) / 2
     x_right = x_left + tag_width + 1 * cm
-
-    # Vertical positioning: both tags on the top half with margin
     top_margin = 3.3 * cm
     y_position = page_height - tag_height - top_margin
 
-    # Prepare canvas
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=A4)
 
-    # Load background image
+    # Background image setup
     image_path = 'static/tag_background.png'
     bg_image = Image.open(image_path).convert("RGB")
     bg_resized = bg_image.resize((int(tag_width), int(tag_height)))
@@ -176,7 +176,7 @@ def pdf_registee(request, unique_id):
     bg_io.seek(0)
     bg_reader = ImageReader(bg_io)
 
-    # Generate QR code
+    # QR code generation
     qr_data = request.build_absolute_uri(f"/mark_present/{reg_couple.unique_id}")
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
     qr.add_data(qr_data)
@@ -187,36 +187,42 @@ def pdf_registee(request, unique_id):
     qr_io.seek(0)
     qr_reader = ImageReader(qr_io)
 
-    # Define two side-by-side tag positions
+    # Positions for each tag
     positions = [
         {"x": x_left, "y": y_position, "name": reg_couple.f_name_f.upper()},
         {"x": x_right, "y": y_position, "name": reg_couple.f_name_m.upper()}
     ]
 
     for pos in positions:
-        # Draw background
+        # Draw tag background
         c.drawImage(bg_reader, pos["x"], pos["y"], width=tag_width, height=tag_height)
 
-        # Draw black border
+        # Draw border
         c.setStrokeColorRGB(0, 0, 0)
         c.rect(pos["x"], pos["y"], tag_width, tag_height)
 
         center_x = pos["x"] + tag_width / 2
-        content_start_y = pos["y"] + 4.4 * cm  # vertical start inside tag
+        content_start_y = pos["y"] + 4.6 * cm
 
-        # Draw surname
+        # Surname
         c.setFont("Times-Bold", 18)
         c.setFillColorRGB(0, 0, 0)
         c.drawCentredString(center_x, content_start_y, reg_couple.s_name.lower())
 
-        # Draw first name
+        # First name
         c.drawCentredString(center_x, content_start_y - 0.6 * cm, pos["name"])
 
-        # Draw QR code
+        # QR code
         qr_size = 2.8 * cm
         qr_x = center_x - qr_size / 2
-        qr_y = content_start_y - 4.0 * cm
+        qr_y = content_start_y - 3.8 * cm
         c.drawImage(qr_reader, qr_x, qr_y, width=qr_size, height=qr_size)
+
+        # Seminar code name under QR (in red and bold)
+        seminar_code = reg_couple.seminar.code_name
+        c.setFont("Times-Bold", 12)
+        c.setFillColorRGB(1, 0, 0)  # Red
+        c.drawCentredString(center_x, qr_y - 0.55 * cm, f"{seminar_code}")
 
     c.showPage()
     c.save()
@@ -226,7 +232,6 @@ def pdf_registee(request, unique_id):
     reg_couple.save()
 
     return FileResponse(buf, as_attachment=True, filename=f'{reg_couple.s_name}.pdf')
-
 
 
 def download_tag(request, surname, unique_id):
@@ -437,3 +442,86 @@ def export_registered_excel(request):
 
 def privacy_policy(request):
     return render(request, "privacy_policy.html", {})
+
+@superuser_required
+def seminar_admin_dashboard(request):
+    seminars = Seminar.objects.all().order_by('title')
+    for seminar in seminars:
+        seminar.assigned_couples = seminar.registered_set.all()
+        seminar.assigned_count = seminar.assigned_couples.count()
+
+    unassigned = Registered.objects.filter(seminar__isnull=True).order_by('s_name')
+
+    return render(request, 'seminars/admin_dashboard.html', {
+        'seminars': seminars,
+        'unassigned': unassigned,
+        'unassigned_count': unassigned.count()
+    })
+
+@superuser_required
+def create_seminar(request):
+    if request.method == 'POST':
+        form = SeminarForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Seminar created successfully.")
+            return redirect('seminar_admin_dashboard')
+    else:
+        form = SeminarForm()
+    return render(request, 'seminars/seminar_form.html', {'form': form, 'title': 'Create Seminar'})
+
+@superuser_required
+def edit_seminar(request, seminar_id):
+    seminar = get_object_or_404(Seminar, id=seminar_id)
+    if request.method == 'POST':
+        form = SeminarForm(request.POST, instance=seminar)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Seminar updated successfully.")
+            return redirect('seminar_admin_dashboard')
+    else:
+        form = SeminarForm(instance=seminar)
+    return render(request, 'seminars/seminar_form.html', {'form': form, 'title': 'Edit Seminar'})
+
+@superuser_required
+def delete_seminar(request, seminar_id):
+    seminar = get_object_or_404(Seminar, id=seminar_id)
+    assigned_count = seminar.registered_set.count()
+
+    if request.method == 'POST':
+        seminar.delete()
+        messages.success(request, f"Seminar deleted. {assigned_count} couple(s) were unassigned.")
+        return redirect('seminar_admin_dashboard')
+
+    return render(request, 'seminars/confirm_delete.html', {
+        'seminar': seminar,
+        'assigned_count': assigned_count
+    })
+
+def choose_seminar(request, unique_id):
+    couple = get_object_or_404(Registered, unique_id=unique_id)
+    user = request.user
+    seminars = Seminar.objects.all().order_by('title')
+
+    is_locked = couple.seminar is not None and not (user.is_superuser or user.is_staff)
+
+    if request.method == 'POST':
+        selected_id = request.POST.get('seminar_id')
+        selected_seminar = Seminar.objects.get(id=selected_id)
+
+        if is_locked:
+            return redirect('choose_seminar', unique_id=unique_id)
+
+        if selected_seminar.slots_remaining() <= 0:
+            messages.error(request, f"'{selected_seminar.title}' is already full. Please select another seminar.")
+            return redirect('choose_seminar', unique_id=unique_id)
+
+        couple.seminar = selected_seminar
+        couple.save()
+        return redirect('choose_seminar', unique_id=unique_id)
+
+    return render(request, 'seminars/choose_seminar.html', {
+        'couple': couple,
+        'seminars': seminars,
+        'is_locked': is_locked,
+    })

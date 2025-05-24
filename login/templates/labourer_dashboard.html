@@ -40,6 +40,7 @@
               <li><a class="dropdown-item" href="{% url 'pdf_registee' user.unique_id %}">Download Tag</a></li>
               <li><a class="dropdown-item" href="{% url 'confirm_attendance' user.s_name user.unique_id %}">Confirm Attendance</a></li>
               <li><a class="dropdown-item" href="{% url 'mark_present' user.unique_id %}">Mark Present</a></li>
+              <li><a class="dropdown-item" href="{% url 'choose_seminar' user.unique_id %}">Choose Seminar</a></li>
               <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#noteModal{{ user.id }}">Add/View Note</a></li>
             </ul>
           </div>

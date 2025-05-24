@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Registered
+from .models import Registered, Seminar
 import phonenumbers
 
 class RegisterForm(ModelForm):
@@ -80,3 +80,28 @@ class RegisterForm(ModelForm):
     def clean_how_heard_about_program(self):
         how_heard = self.cleaned_data['how_heard_about_program']
         return how_heard  # Save selected option
+
+class SeminarForm(forms.ModelForm):
+    class Meta:
+        model = Seminar
+        fields = ['title', 'description', 'code_name', 'max_capacity']
+
+    title = forms.CharField(
+        label="Seminar Title",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    description = forms.CharField(
+        label="Description",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
+
+    code_name = forms.CharField(
+        label="Code Name (for tag)",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    max_capacity = forms.IntegerField(
+        label="Maximum Number of Participants",
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )

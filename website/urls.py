@@ -22,4 +22,9 @@ urlpatterns = [
     path('upload_excel', views.upload_excel, name='upload_registered_excel'),
     path('export_excel', views.export_registered_excel, name='export_registered_excel'),
     path('privacy_policy', views.privacy_policy, name='privacy_policy'),
+    path('seminars/', views.seminar_admin_dashboard, name='seminar_admin_dashboard'),
+    path('seminars/create/', views.create_seminar, name='create_seminar'),
+    path('seminars/<int:seminar_id>/edit/', views.edit_seminar, name='edit_seminar'),
+    path('seminars/<int:seminar_id>/delete/', views.delete_seminar, name='delete_seminar'),
+    path('choose_seminar/<uuid:unique_id>/', views.choose_seminar, name='choose_seminar'),
 ]

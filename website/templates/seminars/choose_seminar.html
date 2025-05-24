@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h3>Seminar Registration for {{ couple.s_name }} ({{ couple.f_name_m }} & {{ couple.f_name_f }})</h3>
+
+  {% if couple.seminar %}
+    <div class="alert alert-info">
+      <strong>You've registered for:</strong> {{ couple.seminar.title }} ({{ couple.seminar.code_name }})
+    </div>
+    {% if not is_locked %}
+      <div class="alert alert-warning">As an admin or labourer, you can change this selection.</div>
+    {% else %}
+      <div class="alert alert-danger">To change this selection, please contact your labourer.</div>
+    {% endif %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="row">
+      {% for seminar in seminars %}
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">{{ seminar.title }}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">Code: {{ seminar.code_name }}</h6>
+              <p class="card-text">{{ seminar.description }}</p>
+              <p><strong>Remaining Slots:</strong> {{ seminar.slots_remaining }}</p>
+
+              {% if is_locked %}
+                <button class="btn btn-secondary" disabled>Selection Locked</button>
+              {% elif seminar.slots_remaining <= 0 %}
+                <button class="btn btn-danger" disabled>Full</button>
+              {% else %}
+                <button class="btn btn-primary" name="seminar_id" value="{{ seminar.id }}">Select</button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </form>
+</div>
+{% endblock %}
