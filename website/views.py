@@ -2,8 +2,8 @@ import json
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Registered, Resource, Seminar
-from .forms import RegisterForm, SeminarForm
+from .models import Registered, Resource, Breakouts
+from .forms import RegisterForm, BreakoutForm
 
 from openpyxl import load_workbook
 from django import forms
@@ -150,10 +150,10 @@ def pdf_registee(request, unique_id):
 
     reg_couple = Registered.objects.get(unique_id=unique_id)
 
-    # Check if seminar is selected
-    if not reg_couple.seminar:
-        messages.warning(request, "You must register for a seminar before downloading your tag.")
-        return redirect('choose_seminar', unique_id=unique_id)
+    # Check if breakout is selected
+    if not reg_couple.breakout:
+        messages.warning(request, "You must register for a breakout before downloading your tag.")
+        return redirect('choose_breakout', unique_id=unique_id)
 
     # Page setup
     page_width, page_height = A4
@@ -218,11 +218,11 @@ def pdf_registee(request, unique_id):
         qr_y = content_start_y - 3.8 * cm
         c.drawImage(qr_reader, qr_x, qr_y, width=qr_size, height=qr_size)
 
-        # Seminar code name under QR (in red and bold)
-        seminar_code = reg_couple.seminar.code_name
+        # Breakout code name under QR (in red and bold)
+        breakout_code = reg_couple.breakout.code_name
         c.setFont("Times-Bold", 12)
         c.setFillColorRGB(1, 0, 0)  # Red
-        c.drawCentredString(center_x, qr_y - 0.55 * cm, f"{seminar_code}")
+        c.drawCentredString(center_x, qr_y - 0.55 * cm, f"{breakout_code}")
 
     c.showPage()
     c.save()
@@ -444,84 +444,84 @@ def privacy_policy(request):
     return render(request, "privacy_policy.html", {})
 
 @superuser_required
-def seminar_admin_dashboard(request):
-    seminars = Seminar.objects.all().order_by('title')
-    for seminar in seminars:
-        seminar.assigned_couples = seminar.registered_set.all()
-        seminar.assigned_count = seminar.assigned_couples.count()
+def breakout_admin_dashboard(request):
+    breakouts = Breakouts.objects.all().order_by('title')
+    for breakout in breakouts:
+        breakout.assigned_couples = breakout.registered_set.all()
+        breakout.assigned_count = breakout.assigned_couples.count()
 
-    unassigned = Registered.objects.filter(seminar__isnull=True).order_by('s_name')
+    unassigned = Registered.objects.filter(breakout__isnull=True).order_by('s_name')
 
-    return render(request, 'seminars/admin_dashboard.html', {
-        'seminars': seminars,
+    return render(request, 'breakouts/admin_dashboard.html', {
+        'breakouts': breakouts,
         'unassigned': unassigned,
         'unassigned_count': unassigned.count()
     })
 
 @superuser_required
-def create_seminar(request):
+def create_breakout(request):
     if request.method == 'POST':
-        form = SeminarForm(request.POST)
+        form = BreakoutForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Seminar created successfully.")
-            return redirect('seminar_admin_dashboard')
+            messages.success(request, "Breakout created successfully.")
+            return redirect('breakout_admin_dashboard')
     else:
-        form = SeminarForm()
-    return render(request, 'seminars/seminar_form.html', {'form': form, 'title': 'Create Seminar'})
+        form = BreakoutForm()
+    return render(request, 'breakouts/breakout_form.html', {'form': form, 'title': 'Create Breakout'})
 
 @superuser_required
-def edit_seminar(request, seminar_id):
-    seminar = get_object_or_404(Seminar, id=seminar_id)
+def edit_breakout(request, breakout_id):
+    breakout = get_object_or_404(Breakouts, id=breakout_id)
     if request.method == 'POST':
-        form = SeminarForm(request.POST, instance=seminar)
+        form = BreakoutForm(request.POST, instance=breakout)
         if form.is_valid():
             form.save()
-            messages.success(request, "Seminar updated successfully.")
-            return redirect('seminar_admin_dashboard')
+            messages.success(request, "Breakout updated successfully.")
+            return redirect('breakout_admin_dashboard')
     else:
-        form = SeminarForm(instance=seminar)
-    return render(request, 'seminars/seminar_form.html', {'form': form, 'title': 'Edit Seminar'})
+        form = BreakoutForm(instance=breakout)
+    return render(request, 'breakouts/breakout_form.html', {'form': form, 'title': 'Edit Breakout'})
 
 @superuser_required
-def delete_seminar(request, seminar_id):
-    seminar = get_object_or_404(Seminar, id=seminar_id)
-    assigned_count = seminar.registered_set.count()
+def delete_breakout(request, breakout_id):
+    breakout = get_object_or_404(Breakouts, id=breakout_id)
+    assigned_count = breakout.registered_set.count()
 
     if request.method == 'POST':
-        seminar.delete()
-        messages.success(request, f"Seminar deleted. {assigned_count} couple(s) were unassigned.")
-        return redirect('seminar_admin_dashboard')
+        breakout.delete()
+        messages.success(request, f"Breakout deleted. {assigned_count} couple(s) were unassigned.")
+        return redirect('breakout_admin_dashboard')
 
-    return render(request, 'seminars/confirm_delete.html', {
-        'seminar': seminar,
+    return render(request, 'breakouts/confirm_delete.html', {
+        'breakout': breakout,
         'assigned_count': assigned_count
     })
 
-def choose_seminar(request, unique_id):
+def choose_breakout(request, unique_id):
     couple = get_object_or_404(Registered, unique_id=unique_id)
     user = request.user
-    seminars = Seminar.objects.all().order_by('title')
+    breakouts = Breakouts.objects.all().order_by('title')
 
-    is_locked = couple.seminar is not None and not (user.is_superuser or user.is_staff)
+    is_locked = couple.breakout is not None and not (user.is_superuser or user.is_staff)
 
     if request.method == 'POST':
-        selected_id = request.POST.get('seminar_id')
-        selected_seminar = Seminar.objects.get(id=selected_id)
+        selected_id = request.POST.get('breakout_id')
+        selected_breakout = Breakouts.objects.get(id=selected_id)
 
         if is_locked:
-            return redirect('choose_seminar', unique_id=unique_id)
+            return redirect('choose_breakout', unique_id=unique_id)
 
-        if selected_seminar.slots_remaining() <= 0:
-            messages.error(request, f"'{selected_seminar.title}' is already full. Please select another seminar.")
-            return redirect('choose_seminar', unique_id=unique_id)
+        if selected_breakout.slots_remaining() <= 0:
+            messages.error(request, f"'{selected_breakout.title}' is already full. Please select another breakout.")
+            return redirect('choose_breakout', unique_id=unique_id)
 
-        couple.seminar = selected_seminar
+        couple.breakout = selected_breakout
         couple.save()
-        return redirect('choose_seminar', unique_id=unique_id)
+        return redirect('choose_breakout', unique_id=unique_id)
 
-    return render(request, 'seminars/choose_seminar.html', {
+    return render(request, 'breakouts/choose_breakout.html', {
         'couple': couple,
-        'seminars': seminars,
+        'breakouts': breakouts,
         'is_locked': is_locked,
     })

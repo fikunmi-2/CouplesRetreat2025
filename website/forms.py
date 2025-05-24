@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Registered, Seminar
+from .models import Registered, Breakouts
 import phonenumbers
 
 class RegisterForm(ModelForm):
@@ -81,13 +81,13 @@ class RegisterForm(ModelForm):
         how_heard = self.cleaned_data['how_heard_about_program']
         return how_heard  # Save selected option
 
-class SeminarForm(forms.ModelForm):
+class BreakoutForm(forms.ModelForm):
     class Meta:
-        model = Seminar
+        model = Breakouts
         fields = ['title', 'description', 'code_name', 'max_capacity']
 
     title = forms.CharField(
-        label="Seminar Title",
+        label="Breakout Title",
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 

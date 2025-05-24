@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h3 class="text-danger">Delete Breakout</h3>
+  <p><strong>Breakout:</strong> {{ breakout.title }}</p>
+  <p><strong>Code Name:</strong> {{ breakout.code_name }}</p>
+  <p>This breakout has <strong>{{ assigned_count }}</strong> couple(s) registered. Deleting this breakout will remove their breakout assignment.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <a href="{% url 'breakout_admin_dashboard' %}" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-danger">Yes, Delete breakout</button>
+  </form>
+</div>
+{% endblock %}

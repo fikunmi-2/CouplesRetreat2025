@@ -319,8 +319,6 @@ def add_recipient_if_unique(data, is_user):
     )
     return recipient, None
 
-
-
 def validate_message_data(data, request):
     errors = {}
 

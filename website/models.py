@@ -2,7 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.auth.models import User
 
-class Seminar(models.Model):
+class Breakouts(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     code_name = models.CharField(max_length=20, unique=True)
@@ -41,7 +41,7 @@ class Registered(models.Model):
     has_confirmed_attendance = models.BooleanField(default=False)
     is_present = models.BooleanField(default=False)
     labourer_note = models.TextField("Labourer Note", blank=True)
-    seminar = models.ForeignKey(Seminar, on_delete=models.SET_NULL, null=True, blank=True, related_name='registered_set')
+    breakout = models.ForeignKey(Breakouts, on_delete=models.SET_NULL, null=True, blank=True, related_name='registered_set')
 
     def __str__(self):
         return self.s_name
