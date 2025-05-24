@@ -94,11 +94,8 @@ class EditUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # Disable 'is_labourer' checkbox only if the user is already staff
-        if self.instance and self.instance.is_staff:
-            self.fields['is_labourer'].disabled = True
-            self.fields['is_labourer'].initial = True
+        if self.instance:
+            self.fields['is_labourer'].initial = self.instance.is_staff
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
@@ -112,25 +109,11 @@ class EditUserForm(forms.ModelForm):
             raise forms.ValidationError("This username is already taken.")
         return username
 
-    def clean(self):
-        cleaned_data = super().clean()
-        is_superuser = cleaned_data.get('is_superuser')
-        is_labourer = cleaned_data.get('is_labourer')
-
-        if not is_superuser and not is_labourer:
-            raise forms.ValidationError("User must be either a Superuser or a Labourer (or both).")
-
-        return cleaned_data
 
     def save(self, commit=True):
         user = super().save(commit=False)
 
-        # Enforce labourer rule: once a labourer, always a labourer
-        if self.instance.is_staff:
-            user.is_staff = True
-        else:
-            user.is_staff = self.cleaned_data['is_labourer']
-
+        user.is_staff = self.cleaned_data['is_labourer']
         user.is_superuser = self.cleaned_data['is_superuser']
 
         password = self.cleaned_data.get('password')

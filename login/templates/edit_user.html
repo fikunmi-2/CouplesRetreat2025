@@ -2,7 +2,6 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Edit User: {{ user_obj.username }}</h2>
-    <small class="text-muted">Labourer status cannot be removed once assigned.</small>
     
     <form method="post">
         {% csrf_token %}
@@ -22,6 +21,8 @@
                 {% endif %}
             </div>
         {% endfor %}
+
+        <input type="hidden" name="confirm" id="confirm" value="0">
 
         <button type="submit" class="btn btn-success">Update</button>
         <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>

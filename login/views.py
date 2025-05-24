@@ -99,24 +99,49 @@ def view_labourer_couples(request, user_id):
         'couples': couples
     })
 
+@superuser_required
 def edit_user(request, user_id):
-    if not request.user.is_superuser:
-        messages.warning(request,
-                         "You do not have permission to access this page. Please login.",
-                         extra_tags='safe')
-        return redirect('admin_login')
-
     user = get_object_or_404(User, pk=user_id)
+    assigned_couples_count = user.assigned_couples.count()
+    is_labourer = user.is_staff
 
     if request.method == 'POST':
         form = EditUserForm(request.POST, instance=user)
+        confirm = request.POST.get('confirm') == '1'
+
         if form.is_valid():
-            form.save()
+            cleaned = form.cleaned_data
+            will_unassign = is_labourer and not cleaned.get('is_labourer')
+            will_delete = not cleaned.get('is_superuser') and not cleaned.get('is_labourer')
+
+            if not confirm and (will_unassign or will_delete):
+                # Inject flags into context to show a confirmation step
+                return render(request, 'edit_user_confirm.html', {
+                    'form': form,
+                    'user_obj': user,
+                    'assigned_couples_count': assigned_couples_count if will_unassign else 0,
+                    'will_be_deleted': will_delete,
+                    'confirmation_needed': True
+                })
+
+            # Process changes after confirmation
+            if will_delete:
+                user.delete()
+                messages.warning(request, f"{user.username} was deleted because they were neither a superuser nor a labourer.")
+            else:
+                if will_unassign:
+                    Registered.objects.filter(labourer=user).update(labourer=None)
+                    messages.warning(request, f"{assigned_couples_count} couples were unassigned from {user.username}.")
+                form.save()
             return redirect('user_list')
     else:
         form = EditUserForm(instance=user)
 
-    return render(request, 'edit_user.html', {'form': form, 'user_obj': user})
+    return render(request, 'edit_user.html', {
+        'form': form,
+        'user_obj': user,
+    })
+
 
 def labourer_dashboard(request):
     if not request.user.is_staff:

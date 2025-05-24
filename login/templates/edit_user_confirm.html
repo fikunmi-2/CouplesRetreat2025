@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h3>⚠ Confirm Changes for {{ user_obj.username }}</h3>
+    <div class="alert alert-warning">
+        {% if assigned_couples_count %}
+            <p><strong>{{ assigned_couples_count }}</strong> couples are currently assigned to this labourer. If you remove labourer status, they will be unassigned.</p>
+        {% endif %}
+        {% if will_be_deleted %}
+            <p>If this user is saved without being a superuser or labourer, their account will be permanently <strong>deleted</strong>.</p>
+        {% endif %}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="hidden" name="confirm" value="1">
+        <button type="submit" class="btn btn-danger">Confirm & Save Changes</button>
+        <a href="{% url 'edit_user' user_obj.id %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
