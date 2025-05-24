@@ -122,9 +122,6 @@ def send_email(recipient, message_text, message_obj):
         response_data = {}
 
         try:
-            print("DEFAULT_FROM_EMAIL:", settings.DEFAULT_FROM_EMAIL)
-            print("EMAIL_HOST_USER:", settings.EMAIL_HOST_USER)
-            print("EMAIL_HOST_PASSWORD:", settings.EMAIL_HOST_PASSWORD)
             send_mail(
                 subject=subject,
                 message=message_text,

@@ -165,13 +165,9 @@ def send_message(request):
                 # Convert to Nigeria timezone before scheduling
                 schedule_date = datetime.strptime(str(message.schedule_date), "%Y-%m-%d").date()
                 schedule_time = datetime.strptime(data.get("scheduleTime", "00:00"), "%H:%M").time()
-                print(f"Type of message.schedule_date: {type(schedule_date)}")
-                print(f"Type of message.schedule_time: {type(schedule_time)}")
                 schedule_datetime = datetime.combine(schedule_date, schedule_time)
                 NIGERIA_TZ = timezone("Africa/Lagos")
                 schedule_datetime = NIGERIA_TZ.localize(schedule_datetime)
-
-                print(f"Scheduling message for: {schedule_datetime} (Nigeria Time)")
 
                 send_scheduled_message.apply_async(
                     args=[message.id],
@@ -179,7 +175,6 @@ def send_message(request):
                 )
             else:
                 # Send immediately
-                print(f"Immediate message for: {message.template.title} (Nigeria Time)")
                 trigger_send_immediate_message(message.id)
 
             message.status = "Received"
@@ -247,14 +242,9 @@ def process_excel_file(file):
 
         recipient, reason = add_recipient_if_unique(data, is_user=False)
         if recipient:
-            print("Here in recipient....: " + recipient.s_name)
             added_recipients.append(recipient)
         else:
-            print(f"Skipped recipient: {data} - Reason: {reason}")
             skipped_recipients.append({"data": data, "reason": reason})
-
-    print(f"Records added: {len(added_recipients)}")
-    print(f"Records skipped: {len(skipped_recipients)}")
 
     return {"added": added_recipients, "skipped": skipped_recipients}
 
@@ -280,10 +270,6 @@ def process_db():
             added_recipients.append(recipient)
         else:
             skipped_recipients.append({"record": record, "reason": reason})
-
-    print(f"Total records processed: {registered_records.count()}")
-    print(f"Records added: {len(added_recipients)}")
-    print(f"Records skipped: {len(skipped_recipients)}")
 
     return {"total": registered_records, "added": added_recipients, "skipped": skipped_recipients}
 
@@ -317,7 +303,6 @@ def add_recipient_if_unique(data, is_user):
     if existing_recipient:
         # existing_recipient.registered_ref = registered_ref
         # existing_recipient.save()
-        # print("Registered REF: ", existing_recipient.registered_ref)
         return existing_recipient, "Duplicate entry"
 
     # Create new recipient
@@ -337,7 +322,6 @@ def add_recipient_if_unique(data, is_user):
 
 
 def validate_message_data(data, request):
-    print("Received data: ", data)
     errors = {}
 
     # Validate recipientSource
