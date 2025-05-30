@@ -1,4 +1,5 @@
 import json
+from enum import unique
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
@@ -68,6 +69,7 @@ def registered(request):
     tag_downloaded_count = registered_list.filter(has_downloaded_tag=True).count()
     confirmed_attendance_count = registered_list.filter(has_confirmed_attendance=True).count()
     present_count = registered_list.filter(is_present=True).count()
+    breakout_selected_count = registered_list.filter(breakout__isnull=False).count()
 
     context = {
         'registered_list': registered_list,
@@ -77,6 +79,7 @@ def registered(request):
         'tag_downloaded_count': tag_downloaded_count,
         'confirmed_attendance_count': confirmed_attendance_count,
         'present_count': present_count,
+        'breakout_selected_count': breakout_selected_count,
     }
 
     if request.method == "POST":
@@ -99,14 +102,16 @@ def registered(request):
 
 
 def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            registered_user = form.save()
-            return redirect('thank_you', registered_user.unique_id)
-    else:
-        form = RegisterForm()
-    return render(request, 'register.html', {'form': form,})
+    if request.user.is_authenticated and request.user.is_superuser:
+        if request.method == 'POST':
+            form = RegisterForm(request.POST)
+            if form.is_valid():
+                registered_user = form.save()
+                return redirect('thank_you', registered_user.unique_id)
+        else:
+            form = RegisterForm()
+        return render(request, 'register.html', {'form': form,})
+    return render(request, 'registeration_closed.html', {})
 
 def thank_you(request, unique_id):
     couple = Registered.objects.get(unique_id=unique_id)  # Replace with your actual model if different
@@ -154,6 +159,11 @@ def pdf_registee(request, unique_id):
     if not reg_couple.breakout:
         messages.warning(request, "You must register for a breakout before downloading your tag.")
         return redirect('choose_breakout', unique_id=unique_id)
+
+    # Check if attendance has been confirmed
+    if not reg_couple.has_confirmed_attendance:
+        messages.warning(request, "You must confirm attendance before downloading your tag.")
+        return redirect('confirm_attendance', surname=reg_couple.s_name, unique_id=unique_id)
 
     # Page setup
     page_width, page_height = A4
@@ -408,30 +418,32 @@ def export_registered_excel(request):
     ws.title = "Registered Couples"
 
     headers = [
-        "Surname", "Husband's First Name", "Phone No (H)", "Email (H)",
+        "Unique ID", "Surname", "Husband's First Name", "Phone No (H)", "Email (H)",
         "Wife's First Name", "Phone No (W)", "Email (W)", "Year Married",
         "Attended Before?", "Heard About Program", "Comments",
-        "Labourer", "Downloaded Tag?", "Confirmed Attendance?", "Present?"
+        "Labourer", "Downloaded Tag?", "Confirmed Attendance?", "Present?", "Breakout Attended"
     ]
     ws.append(headers)
 
     for couple in Registered.objects.all():
         row = [
+            str(couple.unique_id),
             couple.s_name,
             couple.f_name_m,
             couple.phone_no_m,
-            couple.email_m,
+            couple.email_m if couple.email_m else "",
             couple.f_name_f,
             couple.phone_no_f,
-            couple.email_f,
+            couple.email_f if couple.email_f else "",
             couple.year_married,
             couple.attended_previous,
             couple.how_heard_about_program,
-            couple.comments,
+            couple.comments if couple.comments else "",
             couple.labourer.username if couple.labourer else "",
             "Yes" if couple.has_downloaded_tag else "No",
             "Yes" if couple.has_confirmed_attendance else "No",
-            "Yes" if couple.is_present else "No"
+            "Yes" if couple.is_present else "No",
+            couple.breakout.title if couple.breakout else "",
         ]
         ws.append(row)
 
@@ -525,3 +537,12 @@ def choose_breakout(request, unique_id):
         'breakouts': breakouts,
         'is_locked': is_locked,
     })
+
+def couple_welcome(request, surname, unique_id):
+    try:
+        couple = Registered.objects.get(unique_id=unique_id, s_name__iexact=surname)
+    except Registered.DoesNotExist:
+        messages.warning(request, "No matching registration found. Please verify your link or contact us.")
+        return redirect('home')
+
+    return render(request, 'couple_welcome.html', {'couple': couple})

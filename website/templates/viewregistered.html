@@ -4,16 +4,16 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="row text-center mb-4">
-      <div class="col-md-3">
+    <div class="row row-cols-1 row-cols-md-5 g-3 text-center mb-4">
+      <div class="col">
         <div class="card border-primary shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">Total Registered</h5>
+            <h5 class="card-title">Couples</h5>
             <p class="card-text display-6">{{ total_count }}</p>
           </div>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col">
         <div class="card border-success shadow-sm">
           <div class="card-body">
             <h5 class="card-title">Downloaded Tag</h5>
@@ -21,15 +21,15 @@
           </div>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col">
         <div class="card border-info shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">Confirmed Attendance</h5>
+            <h5 class="card-title">Confirmed Att</h5>
             <p class="card-text display-6">{{ confirmed_attendance_count }}</p>
           </div>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col">
         <div class="card border-warning shadow-sm">
           <div class="card-body">
             <h5 class="card-title">Present</h5>
@@ -37,7 +37,16 @@
           </div>
         </div>
       </div>
+      <div class="col">
+        <div class="card border-danger shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Breakout</h5>
+            <p class="card-text display-6">{{ breakout_selected_count }}</p>
+          </div>
+        </div>
+      </div>
     </div>
+
 
   <h2 class="mb-4 text-center">Hi {{ request.user.username }}, Registered Couples</h2>
   <!-- Search Section -->
@@ -99,6 +108,7 @@
       <th scope="col">Email Address</th>
       <th scope="col">Downloaded Tag?</th>
       <th scope="col">Confirmed Att?</th>
+      <th scope="col">Breakout?</th>
       <th scope="col">Present?</th>
       <th scope="col">Action</th>
     </tr>
@@ -117,6 +127,7 @@
       <td>{{ user.email_f }}</td>
       <td>{{ user.has_downloaded_tag|yesno:"Yes ✅,No ❌" }}</td>
       <td>{{ user.has_confirmed_attendance|yesno:"Yes ✅,No ❌" }}</td>
+      <td>{{ user.breakout|yesno:"Yes ✅,No ❌" }}</td>
       <td>{{ user.is_present|yesno:"Yes ✅,No ❌" }}</td>
       <td>
             <div class="dropdown">

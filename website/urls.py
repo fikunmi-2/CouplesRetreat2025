@@ -27,4 +27,6 @@ urlpatterns = [
     path('breakouts/<int:breakout_id>/edit/', views.edit_breakout, name='edit_breakout'),
     path('breakouts/<int:breakout_id>/delete/', views.delete_breakout, name='delete_breakout'),
     path('choose_breakout/<uuid:unique_id>/', views.choose_breakout, name='choose_breakout'),
+    path('welcome/<str:surname>/<uuid:unique_id>/', views.couple_welcome, name='couple_welcome'),
+
 ]

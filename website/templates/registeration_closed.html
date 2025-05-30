@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex flex-column min-vh-100">
+    <!-- Centered content -->
+    <div class="flex-grow-1 d-flex justify-content-center align-items-center px-2">
+        <div class="card p-5 thank-you-card text-center">
+            <h2 class="mb-4 text-gradient fw-bold">
+                🚫 Registration Closed
+            </h2>
+            <p class="lead fs-5">
+                We’re sorry, but registration for <strong>Couples Retreat 2025</strong> has now officially closed.
+            </p>
+            <p class="fs-5 mb-3">
+                We thank you for your interest and hope to have you join us at future events.
+            </p>
+            <p class="fs-5 mb-4">
+                If you have any questions or concerns, please reach out to us at the following numbers:
+                <br><strong>Kolajo: <a href="tel:08038447001">+234 803 844 7001</a></strong> or <strong>Yemisi: <a href="tel:08063056070">+234 806 305 6070</a></strong>
+            </p>
+            <h4 class="text-danger fw-semibold">Thank you for your understanding. 🙏🏽</h4>
+        </div>
+    </div>
+</div>
+
+<style>
+    .thank-you-card {
+        background: linear-gradient(to bottom right, #fff1f5, #e0f7fa);
+        border-radius: 20px;
+        border: 2px solid #e91e63;
+        max-width: 700px;
+        width: 100%;
+        font-family: 'Poppins', sans-serif;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .text-gradient {
+        background: linear-gradient(to right, #e91e63, #2196f3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
+{% endblock %}

@@ -150,8 +150,20 @@ def labourer_dashboard(request):
 
     registered_list = Registered.objects.filter(labourer=request.user).order_by('-created_at')
 
+    # Statistics
+    total_count = registered_list.count()
+    tag_downloaded_count = registered_list.filter(has_downloaded_tag=True).count()
+    confirmed_attendance_count = registered_list.filter(has_confirmed_attendance=True).count()
+    present_count = registered_list.filter(is_present=True).count()
+    breakout_selected_count = registered_list.filter(breakout__isnull=False).count()
+
     return render(request, "labourer_dashboard.html", {
-        "registered_list": registered_list
+        'registered_list': registered_list,
+        'total_count': total_count,
+        'tag_downloaded_count': tag_downloaded_count,
+        'confirmed_attendance_count': confirmed_attendance_count,
+        'present_count': present_count,
+        'breakout_selected_count': breakout_selected_count,
     })
 
 @staff_or_superuser_required
@@ -175,9 +187,13 @@ def labourer_notes(request):
 
     for labourer in labourers:
         couples = Registered.objects.filter(labourer=labourer).order_by('s_name')
+        total = couples.count()
+        confirmed = couples.filter(has_confirmed_attendance=True).count()
         labourer_data.append({
             'labourer': labourer,
-            'couples': couples
+            'couples': couples,
+            'count_total': total,
+            'count_confirmed': confirmed,
         })
 
     return render(request, 'labourer_notes.html', {'labourer_data': labourer_data})

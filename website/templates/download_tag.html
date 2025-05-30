@@ -1,26 +1,92 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <br><br>
-            <h2 class="mb-4">Download Your Tag</h2>
+<style>
+  .tag-download-heading {
+    background: linear-gradient(to right, #d9534f, #0275d8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    text-align: center;
+  }
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <p><strong>S/N:</strong> {{ registered.id }}</p>
-                    <p><strong>Surname:</strong> {{ registered.s_name }}</p>
-                    <p><strong>Husband's Name:</strong> {{ registered.f_name_m }}</p>
-                    <p><strong>Wife's Name:</strong> {{ registered.f_name_f }}</p>
-                    <p><strong>Year Married:</strong> {{ registered.year_married }}</p>
-                </div>
-            </div>
+  .info-card {
+    background: linear-gradient(to bottom right, #f0f4ff, #ffffff);
+    border: 1px solid #d9e2f3;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 25px 30px;
+    font-size: 1rem;
+    transition: box-shadow 0.3s ease;
+  }
 
-            <a class="btn btn-primary" href="{% url 'pdf_registee' registered.unique_id %}">
-                Download Tag
-            </a>
-        </div>
+  .info-card:hover {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+  }
+
+  .info-card p {
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+  }
+
+  .info-card p i {
+    margin-right: 10px;
+    color: #0275d8;
+  }
+
+  .btn-download {
+    font-size: 1.1rem;
+    padding: 12px 30px;
+    display: block;
+    width: 100%;
+    text-align: center;
+    border-radius: 8px;
+  }
+
+  body {
+    background-color: #f7f9fc;
+  }
+</style>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h2 class="mb-4 tag-download-heading">🎟️ Download Your Tag</h2>
+
+      <div class="info-card mb-4">
+      <table class="table table-borderless mb-0">
+        <tbody>
+          <tr>
+            <th scope="row">Surname:</th>
+            <td>{{ registered.s_name }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Husband's Name:</th>
+            <td>{{ registered.f_name_m }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Wife's Name:</th>
+            <td>{{ registered.f_name_f }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Year Married:</th>
+            <td>{{ registered.year_married }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Breakout Session:</th>
+            <td>{{ registered.breakout.code_name }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+
+
+      <a class="btn btn-primary btn-download" href="{% url 'pdf_registee' registered.unique_id %}">
+        ⬇️ Download Tag PDF
+      </a>
+    </div>
+  </div>
 </div>
 {% endblock %}

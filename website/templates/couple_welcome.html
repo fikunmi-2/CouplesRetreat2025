@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  .welcome-heading {
+    background: linear-gradient(to right, #ff3c3c, #0275d8); /* brighter red */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+  }
+  body {
+    background-color: #f5f7fa;
+  }
+  .card-action:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s ease-in-out;
+  }
+</style>
+
+<div class="container mt-5 mb-5">
+  <div class="card shadow-lg p-4 border-0">
+    <div class="text-center mb-4">
+      <h2 class="welcome-heading">Welcome, {{ couple.f_name_m }} & {{ couple.f_name_f }} {{ couple.s_name }}!</h2>
+      <p class="lead text-secondary">We're thrilled to have you join us for <strong>Couples Retreat 2025</strong>.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card border-info card-action h-100">
+          <div class="card-body text-center">
+            <h5 class="card-title">✅ Confirm Attendance</h5>
+            <p class="card-text">Let us know you're coming! This helps us prepare for your arrival.</p>
+            <a href="{% url 'confirm_attendance' couple.s_name couple.unique_id %}" class="btn btn-outline-info mt-2" target="_blank">Confirm Attendance</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card border-warning card-action h-100">
+          <div class="card-body text-center">
+            <h5 class="card-title">📖 Choose Breakout Topic</h5>
+            <p class="card-text">Pick the Bible study session you and your spouse want to attend. Spaces are limited.</p>
+            <a href="{% url 'choose_breakout' couple.unique_id %}" class="btn btn-outline-warning mt-2" target="_blank">Choose Breakout</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card border-success card-action h-100">
+          <div class="card-body text-center">
+            <h5 class="card-title">📥 Download Name Tag</h5>
+            <p class="card-text">After confirming attendance and choosing your breakout topic, you can download your personalized tag.</p>
+            <a href="{% url 'download_tag' couple.s_name couple.unique_id %}" class="btn btn-outline-success mt-2" target="_blank">Download Tag</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card border-primary card-action h-100">
+          <div class="card-body text-center">
+            <h5 class="card-title">📚 View Additional Resources</h5>
+            <p class="card-text">Download handouts, messages, and other helpful materials for the retreat.</p>
+            <a href="{% url 'resources' %}" class="btn btn-outline-primary mt-2" target="_blank">Access Resources</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-5">
+      <h5 class="text-muted">📞 Need help?</h5>
+      <p>
+        Kolajo: <a href="tel:+2348038447001">+234 803 844 7001</a><br>
+        Yemisi: <a href="tel:+2348063056070">+234 806 305 6070</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
