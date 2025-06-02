@@ -26,7 +26,11 @@ def send_immediate_message(message_id):
         message = Message.objects.get(id=message_id)
 
         for recipient in message.recipients.all():
-            send_message_to_recipient(recipient, message, message.delivery_method)
+            send_message_to_recipient(recipient, message, message.delivery_method)\
+
+        # All recipients processed — now mark as sent
+        message.status = "Sent"
+        message.save()
 
     except Message.DoesNotExist:
         return "Message not found"

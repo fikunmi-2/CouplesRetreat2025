@@ -268,7 +268,7 @@ def send_message_to_recipient(recipient, message, delivery_methods):
             print("sending WhatsApp message to recipient {}")
 
     # Update message status and save the change
-    message.status = "Sent"
+    message.status = "In progress"
     message.save()
 
 def generate_message_for_recipient(template, user):
@@ -302,6 +302,63 @@ def generate_message_for_recipient(template, user):
         "phone_number": user.phone_no_m,  # Add phone number for reference
         "email": user.email_m,  # Add email for reference
     }
+
+def send_verification_email(surname, first_name_male, first_name_female, email, code):
+    subject = "Your Couples Retreat 2025 Verification Code"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    message = f"""
+    <p>Dear {first_name_male}/{first_name_female} {surname},</p>
+
+    <p>Thank you for registering for <strong>Couples Retreat 2025</strong>.</p>
+
+    <p>Your <strong>Registration Code</strong> is: <strong><u>{code}</u></strong></p>
+
+    <p>Please use this code to log in to the portal, download your name tag, and access all resources provided for the retreat.</p>
+
+    <p>We look forward to a refreshing and impactful experience together.</p>
+
+    <p>Shalom,<br>
+    <em>The Couples Retreat Team</em></p>
+    """
+
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=from_email,
+            recipient_list=[email],
+            html_message=message,
+        )
+        return True, f"Verification code sent to email: {email}"
+    except Exception as e:
+        return False, f"Error sending email: {str(e)}"
+
+def send_verification_sms(surname, first_name, phone_no, code):
+    message = (
+        f"Dear {surname}, your Registration ID is {code}. "
+        "Use this to login to the portal to download your tag and access all resources. Shalom!"
+    )
+
+    payload = {
+        "to": phone_no,
+        "message": message,
+        "sender": SMARTSMS_SENDER_ID,
+        "type": 0,
+        "routing": 3,
+        "token": SMARTSMS_API_KEY,
+    }
+
+    try:
+        response = requests.post(SMARTSMS_API_URL, data=payload)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("code") == 1000:
+            return True, f"Verification code sent to phone: +{phone_no}"
+        else:
+            print(f"SMS Response data: {data}")
+            return False, f"SMS failed: {data.get('message', 'Unknown error')}"
+    except Exception as e:
+        return False, f"Error sending SMS: {str(e)}"
 
 # def send_email(recipient, message_text, message_obj):
 #     # Logic to send Email

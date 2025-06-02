@@ -2,6 +2,7 @@ import json
 from enum import unique
 
 from django.contrib import messages
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Registered, Resource, Breakouts
 from .forms import RegisterForm, BreakoutForm
@@ -418,7 +419,7 @@ def export_registered_excel(request):
     ws.title = "Registered Couples"
 
     headers = [
-        "Unique ID", "Surname", "Husband's First Name", "Phone No (H)", "Email (H)",
+        "Unique ID", "Registration Code", "Surname", "Husband's First Name", "Phone No (H)", "Email (H)",
         "Wife's First Name", "Phone No (W)", "Email (W)", "Year Married",
         "Attended Before?", "Heard About Program", "Comments",
         "Labourer", "Downloaded Tag?", "Confirmed Attendance?", "Present?", "Breakout Attended"
@@ -426,8 +427,10 @@ def export_registered_excel(request):
     ws.append(headers)
 
     for couple in Registered.objects.all():
+        code = generate_stable_code(couple.unique_id)
         row = [
             str(couple.unique_id),
+            code,
             couple.s_name,
             couple.f_name_m,
             couple.phone_no_m,
@@ -546,3 +549,103 @@ def couple_welcome(request, surname, unique_id):
         return redirect('home')
 
     return render(request, 'couple_welcome.html', {'couple': couple})
+
+def auth_lookup(request):
+    context = {}
+    if request.method == "POST":
+        surname_input = request.POST.get("surname", "")
+        phone_input = request.POST.get("phone", "").strip()
+
+        normalized_surname = surname_input.strip().replace(" ", "-").lower()
+        from django.db.models.functions import Lower
+
+        couple = Registered.objects.filter(
+            Q(phone_no_m=phone_input) | Q(phone_no_f=phone_input)
+        ).annotate(
+            normalized_db_surname=Lower('s_name')
+        ).filter(
+            normalized_db_surname=normalized_surname
+        ).first()
+
+        # Save session and redirect to code entry
+        if couple:
+            request.session["auth_uuid"] = str(couple.unique_id)
+            request.session["auth_phone"] = phone_input
+            return redirect("auth_code")
+        else:
+            context = {'error': "No matching record found. Please check your surname and phone number.",
+                       'surname': surname_input,
+                       'phone': phone_input,}
+
+    return render(request, "auth_lookup.html", context)
+
+def auth_code(request):
+    couple_uuid = request.session.get("auth_uuid")
+    if not couple_uuid:
+        messages.error(request, "Session expired. Please try again.")
+        return redirect("couple_lookup")
+
+    try:
+        couple = Registered.objects.get(unique_id=couple_uuid)
+    except Registered.DoesNotExist:
+        messages.error(request, "Invalid session data.")
+        return redirect("couple_lookup")
+
+    if request.method == "POST":
+        code_entered = request.POST.get("code").strip().upper()
+        correct_code = generate_stable_code(couple.unique_id)
+
+        if code_entered == correct_code:
+            return redirect("couple_welcome", surname=couple.s_name,unique_id=couple.unique_id)
+        else:
+            messages.error(request, "Invalid code. Please try again.")
+
+    return render(request, "auth_code.html", {"couple": couple})
+
+import hashlib
+def generate_stable_code(uuid_val):
+    """
+    Generates a deterministic 6-character code from a UUID.
+    The same UUID will always return the same code.
+    """
+    h = hashlib.sha256(str(uuid_val).encode()).hexdigest()
+    return h[:6].upper()  # Return the first 6 hex digits in uppercase
+
+from django.http import JsonResponse
+def send_auth_code(request):
+    couple_uuid = request.session.get("auth_uuid")
+    phone_used = request.session.get("auth_phone")
+
+    if not couple_uuid and not phone_used:
+        return JsonResponse({"status": "error", "message": "Session expired. Please go back and try again."})
+
+    try:
+        couple = Registered.objects.get(unique_id=couple_uuid)
+    except Registered.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Invalid session data."})
+
+    result = send_verification_code(couple, phone_used)
+    return JsonResponse(result)
+
+from messaging_engine.messaging import send_verification_email, send_verification_sms
+def send_verification_code(couple, input_phone):
+    code = generate_stable_code(couple.unique_id)
+
+    # Determine which contact to send to
+    if couple.phone_no_m == input_phone:
+        if couple.email_m:
+            success, info = send_verification_email(couple.s_name, couple.f_name_m, couple.f_name_f, couple.email_m, code)
+            return {"status": "success" if success else "error", "message": info}
+        elif couple.phone_no_m:
+            success, info = send_verification_sms(couple.s_name, couple.f_name_m, couple.phone_no_m, code)
+            return {"status": "success" if success else "error", "message": info}
+
+    elif couple.phone_no_f == input_phone:
+        if couple.email_f:
+            success, info = send_verification_email(couple.s_name, couple.f_name_m, couple.f_name_f, couple.email_f, code)
+            return {"status": "success" if success else "error", "message": info}
+        elif couple.phone_no_f:
+            success, info = send_verification_sms(couple.s_name, couple.f_name_f, couple.phone_no_f, code)
+            return {"status": "success" if success else "error", "message": info}
+
+    return {"status": "error", "message": "No valid contact info found for the provided phone number."}
