@@ -252,7 +252,8 @@ def download_tag(request, surname, unique_id):
 @staff_or_superuser_required
 def view_registee(request, unique_id):
     reg_couple = get_object_or_404(Registered, unique_id=unique_id)
-    return render(request, 'view_registee.html', {'registered': reg_couple})
+    reg_code = generate_stable_code(unique_id)
+    return render(request, 'view_registee.html', {'registered': reg_couple, 'reg_code': reg_code})
 
 def confirm_attendance(request, surname, unique_id):
     reg_couple = get_object_or_404(Registered, s_name__iexact=surname, unique_id=unique_id)

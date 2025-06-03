@@ -1,32 +1,38 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-  <h3 class="mb-4">Enter Your Verification Code ({{ couple.s_name }})</h3>
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm border-0 p-4">
+        <h3 class="text-center mb-4">Enter Your Verification Code ({{ couple.s_name }})</h3>
 
-  <form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label for="code" class="form-label">Verification Code</label>
-      <input type="text" class="form-control" name="code" required placeholder="Enter the 6-digit code">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="code" class="form-label">Verification Code</label>
+            <input type="text" class="form-control" name="code" required placeholder="Enter the 6-digit code">
+          </div>
+          <button type="submit" class="btn btn-success w-100">Verify</button>
+        </form>
+
+        <hr>
+
+        <button id="send-code-btn" class="btn btn-outline-primary w-100">Send me the code</button>
+        <div id="code-feedback" class="mt-3 text-info text-center"></div>
+
+        <p class="text-muted mt-4 text-center">
+          Didn’t receive your code? Please contact Kolajo (08038447001) or Yemisi (08063056070).
+        </p>
+      </div>
     </div>
-    <button type="submit" class="btn btn-success">Verify</button>
-  </form>
-
-  <hr>
-
-  <button id="send-code-btn" class="btn btn-outline-primary mt-3">Send me the code</button>
-  <div id="code-feedback" class="mt-3 text-info"></div>
-
-  <p class="text-muted mt-3">
-    Didn’t receive your code? Please contact Kolajo (08038447001) or Yemisi (08063056070).
-  </p>
+  </div>
 </div>
 
 <script>
   document.getElementById('send-code-btn').addEventListener('click', function () {
     const button = document.getElementById("send-code-btn");
-    button.disabled = true; // Disable the button immediately
+    button.disabled = true;
     button.innerText = "Sending...";
 
     fetch("{% url 'send_auth_code' %}", {
@@ -43,15 +49,14 @@
     .then(response => response.json())
     .then(data => {
       const feedback = document.getElementById('code-feedback');
-      feedback.className = data.status === "success" ? "mt-3 text-success" : "mt-3 text-danger";
+      feedback.className = data.status === "success" ? "mt-3 text-success text-center" : "mt-3 text-danger text-center";
       feedback.innerText = data.message;
-
       button.innerText = "Code Sent";
     })
     .catch(error => {
       console.error("Error sending code:", error);
       const feedback = document.getElementById('code-feedback');
-      feedback.className = "mt-3 text-danger";
+      feedback.className = "mt-3 text-danger text-center";
       feedback.innerText = "Something went wrong. Please try again.";
       button.innerText = "Code Sent";
     });
