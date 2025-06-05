@@ -50,35 +50,43 @@
 
   <h2 class="mb-4 text-center">Hi {{ request.user.username }}, Registered Couples</h2>
   <!-- Search Section -->
-  <form method="POST" id="searchForm" class="d-flex flex-wrap gap-2 mb-4">
-    {% csrf_token %}
+<form method="POST" id="searchForm" class="d-flex flex-wrap gap-2 mb-4">
+  {% csrf_token %}
 
-      <label for="filter_field"></label>
-      <select name="filter_field" id="filter_field" class="form-select" required>
-      <option value="s_name" selected>Surname</option>
-      <option value="f_name_m">Husband's First Name</option>
-      <option value="phone_no_m">Husband's Phone Number</option>
-      <option value="email_m">Husband's Email</option>
-      <option value="f_name_f">Wife's First Name</option>
-      <option value="phone_no_f">Wife's Phone Number</option>
-      <option value="email_f">Wife's Email</option>
-      <option value="year_married">Year Married</option>
-      <option value="attended_previous">Attended Previous Version?</option>
-      <option value="how_heard_about_program">How You Heard About Program</option>
-      <option value="has_downloaded_tag">Has Downloaded Tag</option>
-      <option value="has_confirmed_attendance">Has Confirmed Attendance</option>
-      <option value="is_present">Will Be Present</option>
-    </select>
+  <!-- Hidden input to restore operator after JS populates options -->
+  <input type="hidden" id="previous_operator" value="{{ operator|default:'' }}">
 
-      <label for="filter_operator"></label>
-      <select name="filter_operator" id="filter_operator" class="form-select" required></select>
+  <!-- Filter Field -->
+  <label for="filter_field" class="visually-hidden">Field</label>
+  <select name="filter_field" id="filter_field" class="form-select" required>
+    <option value="s_name" {% if field == "s_name" %}selected{% endif %}>Surname</option>
+    <option value="f_name_m" {% if field == "f_name_m" %}selected{% endif %}>Husband's First Name</option>
+    <option value="phone_no_m" {% if field == "phone_no_m" %}selected{% endif %}>Husband's Phone Number</option>
+    <option value="email_m" {% if field == "email_m" %}selected{% endif %}>Husband's Email</option>
+    <option value="f_name_f" {% if field == "f_name_f" %}selected{% endif %}>Wife's First Name</option>
+    <option value="phone_no_f" {% if field == "phone_no_f" %}selected{% endif %}>Wife's Phone Number</option>
+    <option value="email_f" {% if field == "email_f" %}selected{% endif %}>Wife's Email</option>
+    <option value="year_married" {% if field == "year_married" %}selected{% endif %}>Year Married</option>
+    <option value="attended_previous" {% if field == "attended_previous" %}selected{% endif %}>Attended Previous Version?</option>
+    <option value="how_heard_about_program" {% if field == "how_heard_about_program" %}selected{% endif %}>How You Heard About Program</option>
+    <option value="has_downloaded_tag" {% if field == "has_downloaded_tag" %}selected{% endif %}>Has Downloaded Tag</option>
+    <option value="breakout" {% if field == "breakout" %}selected{% endif %}>Has Selected Breakout</option>
+    <option value="has_confirmed_attendance" {% if field == "has_confirmed_attendance" %}selected{% endif %}>Has Confirmed Attendance</option>
+    <option value="is_present" {% if field == "is_present" %}selected{% endif %}>Will Be Present</option>
+  </select>
 
-    <div id="filter_value_container">
-        <input class="form-control" type="text" name="filter_value" id="filter_value" placeholder="Enter value" required>
-    </div>
+  <!-- Filter Operator -->
+  <label for="filter_operator" class="visually-hidden">Operator</label>
+  <select name="filter_operator" id="filter_operator" class="form-select" required></select>
 
-    <button type="submit" id="searchButton" class="btn btn-success" disabled>Search</button>
-  </form>
+  <!-- Filter Value Input -->
+  <div id="filter_value_container">
+    <input class="form-control" type="text" name="filter_value" id="filter_value"
+           placeholder="Enter value" value="{{ value|default_if_none:'' }}">
+  </div>
+
+  <button type="submit" id="searchButton" class="btn btn-success" disabled>Search</button>
+</form>
 
   {% if searched %}
     <p class="text-center"><strong>Search Result:</strong> {{ search }} - Count: {{ search_count }}</p>
@@ -182,6 +190,7 @@
     attended_previous: "boolean_text",
     how_heard_about_program: "text",
     has_downloaded_tag: "boolean",
+    breakout: "boolean",
     has_confirmed_attendance: "boolean",
     is_present: "boolean"
   };
@@ -252,8 +261,16 @@
   filterValue.addEventListener("input", updateSearchButton);
 
   window.addEventListener("DOMContentLoaded", () => {
-    filterField.dispatchEvent(new Event("change"));
-  });
+      filterField.dispatchEvent(new Event("change"));  // triggers operator dropdown
+
+      const previousOperator = document.getElementById("previous_operator").value;
+      if (previousOperator) {
+        filterOperator.value = previousOperator;
+      }
+
+      updateSearchButton();  // Re-enable button if form is valid
+    });
+
 </script>
 
 

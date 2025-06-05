@@ -37,29 +37,38 @@ def home(request):
 
 def get_registered_queryset_from_filter(filter_field, filter_operator, filter_value):
     try:
-        if filter_operator in ["true", "false"]:
-            filter_value = True if filter_operator == "true" else False
-            filter_kwargs = {f"{filter_field}": filter_value}
+        filter_kwargs = {}
 
-        elif filter_operator in ["Yes", "No"]:
-            filter_kwargs = {f"{filter_field}": filter_operator}
+        # Boolean-type fields (including breakout as null check)
+        if filter_operator.lower() in ["true", "false", "yes", "no"]:
+            truthy = filter_operator.lower() in ["true", "yes", "1"]
 
+            # Special handling for ForeignKey fields like 'breakout'
+            if filter_field == "breakout":
+                filter_kwargs = {f"{filter_field}__isnull": not truthy}
+            else:
+                filter_kwargs = {f"{filter_field}": truthy}
+
+        # 'ne' means not equal (exclude)
+        elif filter_operator == "ne":
+            if not filter_value:
+                return None, "Filter value is required for 'ne' operator."
+            filter_kwargs = {f"{filter_field}__exact": filter_value}
+            queryset = Registered.objects.exclude(**filter_kwargs)
+            return queryset, None
+
+        # Other operators (icontains, gte, lte, etc.)
         else:
             if not filter_value:
                 return None, "Filter value is required for the selected filter."
-
-            if filter_operator == "ne":
-                filter_kwargs = {f"{filter_field}__exact": filter_value}
-                queryset = Registered.objects.exclude(**filter_kwargs)
-                return queryset, None
-            else:
-                filter_kwargs = {f"{filter_field}__{filter_operator}": filter_value}
+            filter_kwargs = {f"{filter_field}__{filter_operator}": filter_value}
 
         queryset = Registered.objects.filter(**filter_kwargs)
         return queryset, None
 
     except Exception as e:
         return None, str(e)
+
 
 @superuser_required
 def registered(request):
@@ -92,6 +101,9 @@ def registered(request):
         if queryset is not None:
             context['registered_list'] = queryset.order_by("id")
             context['searched'] = True
+            context['field'] = field
+            context['operator'] = operator
+            context['value'] = value
             context['search'] = f"{field} {operator} '{value}'" if value else f"{field} = {operator}"
             context['search_count'] = queryset.count()
         else:
