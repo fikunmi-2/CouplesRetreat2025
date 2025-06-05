@@ -15,6 +15,7 @@
                     <th>Name</th>
                     <th>Description</th>
                     <th>Link</th>
+                    <th>Priority</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -23,6 +24,7 @@
                 <tr>
                     <td><strong>{{ resource.name }}</strong></td>
                     <td>{{ resource.description|truncatewords:15 }}</td>
+                    <td>{{ resource.priority|yesno:"Yes, No" }}</td>
                     <td><a href="{{ resource.link }}" target="_blank">{{ resource.link }}</a></td>
                     <td>
                         <a href="{% url 'edit_resource' resource.pk %}" class="btn btn-sm btn-primary me-1">✏️ Edit</a>

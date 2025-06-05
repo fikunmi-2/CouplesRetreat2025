@@ -271,7 +271,7 @@ def view_comments(request):
     return render(request, 'view_comments.html', {'couples': couples_with_comments})
 
 def resources(request):
-    resource_info = Resource.objects.all().order_by('-id')
+    resource_info = Resource.objects.all().order_by('-priority', '-id')
     return render(request, 'resources/resource_list.html', {'resources': resource_info})
 
 @superuser_required
@@ -280,15 +280,16 @@ def add_resource(request):
         name = request.POST.get('name')
         description = request.POST.get('description')
         link = request.POST.get('link')
+        priority = 'priority' in request.POST
 
-        Resource.objects.create(name=name, description=description, link=link)
+        Resource.objects.create(name=name, description=description, link=link, priority=priority)
         return redirect('manage_resources')
 
     return render(request, 'resources/add_resource.html')
 
 @superuser_required
 def manage_resources(request):
-    resource_info = Resource.objects.all().order_by('-id')
+    resource_info = Resource.objects.all().order_by('-priority', '-id')
     return render(request, 'resources/manage_resources.html', {'resources': resource_info})
 
 @superuser_required
@@ -298,6 +299,7 @@ def edit_resource(request, pk):
         resource_info.name = request.POST.get('name')
         resource_info.description = request.POST.get('description')
         resource_info.link = request.POST.get('link')
+        resource_info.priority = 'priority' in request.POST
         resource_info.save()
         messages.success(request, f'Resource ({resource_info.name}) has been updated.')
         return redirect('manage_resources')
