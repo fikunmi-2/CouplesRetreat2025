@@ -124,7 +124,7 @@ def register(request):
         else:
             form = RegisterForm()
         return render(request, 'register.html', {'form': form,})
-    return render(request, 'registeration_closed.html', {})
+    return render(request, 'registration_closed.html', {})
 
 def thank_you(request, unique_id):
     couple = Registered.objects.get(unique_id=unique_id)  # Replace with your actual model if different
@@ -184,7 +184,7 @@ def pdf_registee(request, unique_id):
     tag_height = 12.4 * cm
     x_left = (page_width - (2 * tag_width + 1 * cm)) / 2
     x_right = x_left + tag_width + 1 * cm
-    top_margin = 3.3 * cm
+    top_margin = 0.5 * cm
     y_position = page_height - tag_height - top_margin
 
     buf = io.BytesIO()
@@ -225,7 +225,7 @@ def pdf_registee(request, unique_id):
         c.rect(pos["x"], pos["y"], tag_width, tag_height)
 
         center_x = pos["x"] + tag_width / 2
-        content_start_y = pos["y"] + 4.6 * cm
+        content_start_y = pos["y"] + 4.8 * cm
 
         # Surname
         c.setFont("Times-Bold", 18)
@@ -270,9 +270,18 @@ def view_registee(request, unique_id):
 def confirm_attendance(request, surname, unique_id):
     reg_couple = get_object_or_404(Registered, s_name__iexact=surname, unique_id=unique_id)
 
+    # Handle POST request
     if request.method == 'POST':
-        reg_couple.has_confirmed_attendance = True
-        reg_couple.save()
+        if request.GET.get('action') == 'unconfirm':
+            if request.user.is_authenticated and request.user.is_superuser:
+                reg_couple.has_confirmed_attendance = False
+                reg_couple.save()
+                messages.success(request, "Attendance unconfirmed successfully.")
+            else:
+                messages.error(request, "You are not authorized to perform this action.")
+        else:
+            reg_couple.has_confirmed_attendance = True
+            reg_couple.save()
         return redirect('confirm_attendance', surname=surname, unique_id=unique_id)
 
     return render(request, 'confirm_attendance.html', {'registered': reg_couple})

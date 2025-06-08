@@ -5,7 +5,7 @@
     {% for res in resources %}
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="card-title">{{ res.name }}</h5>
+                <h5 class="card-title"><strong>{{ res.name }}</strong></h5>
                 <p class="card-text">{{ res.description }}</p>
                 <a href="{{ res.link }}" class="btn btn-outline-primary" target="_blank">View {{ res.name }}</a>
             </div>

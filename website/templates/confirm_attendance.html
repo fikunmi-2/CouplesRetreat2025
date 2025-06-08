@@ -1,15 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <br><br>
+<br><br>
 <div class="container mt-5">
-  <h2 class="mb-4">Confirm Attendance</h2>
-
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
+  <h2 class="mb-4"><strong>Confirm Attendance</strong></h2>
 
   <table class="table table-bordered">
     <tbody>
@@ -36,6 +30,17 @@
     <div class="alert alert-info mt-3">
       ✅ Thank you for confirming your attendance!!!
     </div>
+
+    {% if request.user.is_authenticated and request.user.is_superuser %}
+        <div class="alert alert-warning mt-2">
+          As an admin, you can Unconfirm this couples attendance.
+        </div>
+      <form method="post" action="?action=unconfirm">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger mt-2">Unconfirm Attendance</button>
+      </form>
+    {% endif %}
+
   {% else %}
     <form method="post">
       {% csrf_token %}
