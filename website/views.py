@@ -275,8 +275,9 @@ def confirm_attendance(request, surname, unique_id):
         if request.GET.get('action') == 'unconfirm':
             if request.user.is_authenticated and request.user.is_superuser:
                 reg_couple.has_confirmed_attendance = False
+                reg_couple.breakout = None
                 reg_couple.save()
-                messages.success(request, "Attendance unconfirmed successfully.")
+                messages.success(request, "Attendance Unconfirmed and Breakout Selection Removed Successfully")
             else:
                 messages.error(request, "You are not authorized to perform this action.")
         else:
