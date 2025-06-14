@@ -28,26 +28,27 @@
 
   <!-- Remembered Questions List -->
   {% if questions %}
-    <h4 class="mb-3">📋 Submitted Questions{% endif %}</h4>
+  <h4 class="mb-3">📋 Submitted Questions</h4>
 
-    <div class="list-group shadow-sm">
-      {% for q in questions %}
-        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
-          <div class="w-100">
-            <p class="mb-1">
-              <strong>Question {{ forloop.counter }}:</strong> {{ q.text }}
-            </p>
-            <small class="text-muted">
-              Submitted on {{ q.created_at|date:"M j, Y - g:i A" }}
-            </small>
-          </div>
-          <div class="d-flex flex-column align-items-end ms-3">
-            <a href="{% url 'edit_question' q.pk surname unique_id %}" class="btn btn-sm btn-outline-primary mb-1">Edit</a>
-            <a href="{% url 'delete_question' q.pk surname unique_id %}" class="btn btn-sm btn-outline-danger"
-               onclick="return confirm('Are you sure you want to delete this question?');">Delete</a>
-          </div>
+  <div class="list-group shadow-sm">
+    {% for q in questions %}
+      <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+        <div class="w-100">
+          <p class="mb-1">
+            <strong>Question {{ forloop.counter }}:</strong> {{ q.text }}
+          </p>
+          <small class="text-muted">
+            Submitted on {{ q.created_at|date:"M j, Y - g:i A" }}
+          </small>
         </div>
-      {% endfor %}
-    </div>
+        <div class="d-flex flex-column align-items-end ms-3">
+          <a href="{% url 'edit_question' q.pk surname unique_id %}" class="btn btn-sm btn-outline-primary mb-1">Edit</a>
+          <a href="{% url 'delete_question' q.pk surname unique_id %}" class="btn btn-sm btn-outline-danger"
+             onclick="return confirm('Are you sure you want to delete this question?');">Delete</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 </div>
 {% endblock %}
