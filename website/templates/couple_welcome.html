@@ -56,6 +56,17 @@
       </div>
 
       <div class="col-md-6">
+          <div class="card border-danger card-action h-100">
+            <div class="card-body text-center">
+              <h5 class="card-title">❓ Q & A Submission</h5>
+              <p class="card-text">Have a question you’d like answered during the retreat? Submit it here. You can choose to save it for later editing or ask anonymously.</p>
+              <a href="{% url 'submit_question' couple.s_name couple.unique_id %}" class="btn btn-outline-danger mt-2" target="_blank">Ask a Question</a>
+            </div>
+          </div>
+        </div>
+
+
+      <div class="col-md-6">
         <div class="card border-primary card-action h-100">
           <div class="card-body text-center">
             <h5 class="card-title">📚 View Additional Resources</h5>

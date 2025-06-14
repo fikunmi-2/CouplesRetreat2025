@@ -83,6 +83,7 @@
         }
       }
     </style>
+      {% block extra_head %}{% endblock %}
   </head>
 
   <body class="d-flex flex-column min-vh-100">
@@ -130,6 +131,8 @@
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="{% url 'manage_resources' %}">Manage Resources</a></li>
               <li><a class="dropdown-item" href="{% url 'breakout_admin_dashboard' %}">Manage Breakouts</a></li>
+              <li><a class="dropdown-item" href="{% url 'admin_question_list' %}">Manage Questions</a></li>
+              <li><a class="dropdown-item" href="{% url 'present_questions' %}">Present Questions</a></li>
               <li><a class="dropdown-item" href="{% url 'upload_registered_excel' %}">Import/Export</a></li>
             </ul>
           </li>

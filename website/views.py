@@ -4,7 +4,7 @@ from enum import unique
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Registered, Resource, Breakouts
+from .models import *
 from .forms import RegisterForm, BreakoutForm
 
 from openpyxl import load_workbook
@@ -79,6 +79,7 @@ def registered(request):
     tag_downloaded_count = registered_list.filter(has_downloaded_tag=True).count()
     confirmed_attendance_count = registered_list.filter(has_confirmed_attendance=True).count()
     present_count = registered_list.filter(is_present=True).count()
+    present_count_day2 = registered_list.filter(is_present_day2=True).count()
     breakout_selected_count = registered_list.filter(breakout__isnull=False).count()
 
     context = {
@@ -89,6 +90,7 @@ def registered(request):
         'tag_downloaded_count': tag_downloaded_count,
         'confirmed_attendance_count': confirmed_attendance_count,
         'present_count': present_count,
+        'present_count_day2': present_count_day2,
         'breakout_selected_count': breakout_selected_count,
     }
 
@@ -133,7 +135,7 @@ def thank_you(request, unique_id):
 @superuser_required
 def mark_present(request, unique_id):
     reg_couple = Registered.objects.get(unique_id=unique_id)
-    reg_couple.is_present = True
+    reg_couple.is_present_day2 = True
     reg_couple.save()
     return render(request, 'mark_present.html', {'registered': reg_couple})
 
@@ -447,7 +449,7 @@ def export_registered_excel(request):
         "Unique ID", "Registration Code", "Surname", "Husband's First Name", "Phone No (H)", "Email (H)",
         "Wife's First Name", "Phone No (W)", "Email (W)", "Year Married",
         "Attended Before?", "Heard About Program", "Comments",
-        "Labourer", "Downloaded Tag?", "Confirmed Attendance?", "Present?", "Breakout Attended"
+        "Labourer", "Downloaded Tag?", "Confirmed Attendance?", "Present?", "Present 2?", "Breakout Attended"
     ]
     ws.append(headers)
 
@@ -471,6 +473,7 @@ def export_registered_excel(request):
             "Yes" if couple.has_downloaded_tag else "No",
             "Yes" if couple.has_confirmed_attendance else "No",
             "Yes" if couple.is_present else "No",
+            "Yes" if couple.is_present_day2 else "No",
             couple.breakout.title if couple.breakout else "",
         ]
         ws.append(row)
@@ -674,3 +677,98 @@ def send_verification_code(couple, input_phone):
             return {"status": "success" if success else "error", "message": info}
 
     return {"status": "error", "message": "No valid contact info found for the provided phone number."}
+
+
+def submit_question(request, surname, unique_id):
+    remembered_questions = Question.objects.filter(
+        surname__iexact=surname,
+        unique_id=unique_id,
+        remember=True
+    ).order_by('created_at')
+
+    if request.method == 'POST':
+        text = request.POST.get('text', '')
+        remember = 'remember' in request.POST
+
+        Question.objects.create(
+            surname=surname,
+            unique_id=unique_id,
+            text=text,
+            remember=remember
+        )
+        messages.success(request, "Your question was submitted.")
+        return redirect('submit_question', surname=surname, unique_id=unique_id)
+
+    return render(request, 'questions\submit_question.html', {
+        'questions': remembered_questions,
+        'surname': surname,
+        'unique_id': unique_id
+    })
+
+def edit_question(request, pk, surname, unique_id):
+    if request.user.is_authenticated and request.user.is_superuser:
+        question = get_object_or_404(Question, pk=pk, surname__iexact=surname, unique_id=unique_id)
+    else:
+        question = get_object_or_404(Question, pk=pk, surname__iexact=surname, unique_id=unique_id, remember=True)
+
+    if request.method == 'POST':
+        question.text = request.POST.get('text', question.text)
+        question.remember = 'remember' in request.POST
+        question.save()
+        messages.success(request, "Your question has been updated.")
+        if request.user.is_authenticated and request.user.is_superuser:
+            return redirect('admin_question_list')
+        return redirect('submit_question', surname=surname, unique_id=unique_id)
+
+    return render(request, 'questions/edit_question.html', {
+        'question': question,
+        'surname': surname,
+        'unique_id': unique_id,
+    })
+
+def delete_question(request, pk, surname, unique_id):
+    question = get_object_or_404(Question, pk=pk, surname__iexact=surname, unique_id=unique_id)
+    question.delete()
+    messages.success(request, "Your question was deleted.")
+    if request.user.is_authenticated and request.user.is_superuser:
+        return redirect('admin_question_list')
+    return redirect('submit_question', surname=surname, unique_id=unique_id)
+
+@superuser_required
+def list_all_questions(request):
+    questions = Question.objects.all().order_by('created_at')
+    return render(request, 'questions/admin_question_list.html', {'questions': questions})
+
+@superuser_required
+def present_questions(request):
+    from django.core.paginator import Paginator
+    questions = Question.objects.all().order_by('created_at')
+    q = request.GET.get('q', '1')
+
+    try:
+        q = int(q)
+        if q < 1:
+            raise ValueError
+    except ValueError:
+        return redirect(f"{request.path}?q=1")
+
+    total = questions.count()
+
+    if total == 0:
+        return render(request, 'questions/present_questions.html', {'no_questions': True})
+
+    if q > total:
+        return redirect(f"{request.path}?q={total}")
+
+    question = questions[q - 1]
+    context = {
+        'question': question,
+        'q_index': q,
+        'total': total,
+        'first_q': 1,
+        'last_q': total,
+        'has_prev': q > 1,
+        'has_next': q < total,
+    }
+
+    return render(request, 'questions/present_questions.html', context)

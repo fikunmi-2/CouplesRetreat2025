@@ -155,6 +155,7 @@ def labourer_dashboard(request):
     tag_downloaded_count = registered_list.filter(has_downloaded_tag=True).count()
     confirmed_attendance_count = registered_list.filter(has_confirmed_attendance=True).count()
     present_count = registered_list.filter(is_present=True).count()
+    present_count_day2 = registered_list.filter(is_present_day2=True).count()
     breakout_selected_count = registered_list.filter(breakout__isnull=False).count()
 
     return render(request, "labourer_dashboard.html", {
@@ -163,6 +164,7 @@ def labourer_dashboard(request):
         'tag_downloaded_count': tag_downloaded_count,
         'confirmed_attendance_count': confirmed_attendance_count,
         'present_count': present_count,
+        'present_count_day2': present_count_day2,
         'breakout_selected_count': breakout_selected_count,
     })
 

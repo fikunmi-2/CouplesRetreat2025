@@ -31,4 +31,10 @@ urlpatterns = [
     path('auth/lookup/', views.auth_lookup, name='auth_lookup'),
     path('auth/code/', views.auth_code, name='auth_code'),
     path('auth/send_code/', views.send_auth_code, name='send_auth_code'),
+    path('questions/<str:surname>/<uuid:unique_id>/', views.submit_question, name='submit_question'),
+    path('questions/delete/<int:pk>/<str:surname>/<uuid:unique_id>/', views.delete_question, name='delete_question'),
+    path('questions/edit/<int:pk>/<str:surname>/<uuid:unique_id>/', views.edit_question, name='edit_question'),
+    path('view_questions/', views.list_all_questions, name='admin_question_list'),
+    path('questions/presenter/', views.present_questions, name='present_questions'),
+
 ]

@@ -4,48 +4,61 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="row row-cols-1 row-cols-md-5 g-3 text-center mb-4">
-      <div class="col">
-        <div class="card border-primary shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Couples</h5>
-            <p class="card-text display-6">{{ total_count }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <div class="card border-success shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Downloaded Tag</h5>
-            <p class="card-text display-6">{{ tag_downloaded_count }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <div class="card border-info shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Confirmed Att</h5>
-            <p class="card-text display-6">{{ confirmed_attendance_count }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <div class="card border-danger shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Breakout</h5>
-            <p class="card-text display-6">{{ breakout_selected_count }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <div class="card border-warning shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Present</h5>
-            <p class="card-text display-6">{{ present_count }}</p>
-          </div>
-        </div>
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3 text-center mb-4 flex-nowrap overflow-auto">
+  <div class="col" style="min-width: 180px;">
+    <div class="card border-primary shadow-sm">
+      <div class="card-body py-3 px-2">
+        <h6 class="card-title mb-1">Couples</h6>
+        <p class="card-text h4 mb-0">{{ total_count }}</p>
       </div>
     </div>
+  </div>
+
+  <div class="col" style="min-width: 180px;">
+    <div class="card border-success shadow-sm">
+      <div class="card-body py-3 px-2">
+        <h6 class="card-title mb-1">Downloaded Tag</h6>
+        <p class="card-text h4 mb-0">{{ tag_downloaded_count }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" style="min-width: 180px;">
+    <div class="card border-info shadow-sm">
+      <div class="card-body py-3 px-2">
+        <h6 class="card-title mb-1">Confirmed Att</h6>
+        <p class="card-text h4 mb-0">{{ confirmed_attendance_count }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" style="min-width: 180px;">
+    <div class="card border-danger shadow-sm">
+      <div class="card-body py-3 px-2">
+        <h6 class="card-title mb-1">Breakout</h6>
+        <p class="card-text h4 mb-0">{{ breakout_selected_count }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" style="min-width: 180px;">
+    <div class="card border-warning shadow-sm">
+      <div class="card-body py-3 px-2">
+        <h6 class="card-title mb-1">Present</h6>
+        <p class="card-text h4 mb-0">{{ present_count }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" style="min-width: 180px;">
+    <div class="card border-warning shadow-sm">
+      <div class="card-body py-3 px-2">
+        <h6 class="card-title mb-1">Present 2</h6>
+        <p class="card-text h4 mb-0">{{ present_count_day2 }}</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 
   <h2 class="mb-4 text-center">Hi {{ request.user.username }}, Registered Couples</h2>
@@ -72,7 +85,8 @@
     <option value="has_downloaded_tag" {% if field == "has_downloaded_tag" %}selected{% endif %}>Has Downloaded Tag</option>
     <option value="breakout" {% if field == "breakout" %}selected{% endif %}>Has Selected Breakout</option>
     <option value="has_confirmed_attendance" {% if field == "has_confirmed_attendance" %}selected{% endif %}>Has Confirmed Attendance</option>
-    <option value="is_present" {% if field == "is_present" %}selected{% endif %}>Will Be Present</option>
+    <option value="is_present" {% if field == "is_present" %}selected{% endif %}>Is Present</option>
+    <option value="is_present_day2" {% if field == "is_present_day2" %}selected{% endif %}>Is Present 2</option>
   </select>
 
   <!-- Filter Operator -->
@@ -118,11 +132,12 @@
       <th scope="col">Confirmed Att?</th>
       <th scope="col">Breakout?</th>
       <th scope="col">Present?</th>
+      <th scope="col">Present 2?</th>
       <th scope="col">Action</th>
     </tr>
   </thead>
 
-  <tbody>
+  <tbody class="table-group-divider">
     {% for user in registered_list%}
     <tr>
       <th scope="row">{{ user.id }}</th>
@@ -137,6 +152,7 @@
       <td>{{ user.has_confirmed_attendance|yesno:"Yes ✅,No ❌" }}</td>
       <td>{{ user.breakout|yesno:"Yes ✅,No ❌" }}</td>
       <td>{{ user.is_present|yesno:"Yes ✅,No ❌" }}</td>
+      <td>{{ user.is_present_day2|yesno:"Yes ✅,No ❌" }}</td>
       <td>
             <div class="dropdown">
                 <a class="btn btn-outline-warning dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Action</a>
@@ -192,7 +208,8 @@
     has_downloaded_tag: "boolean",
     breakout: "boolean",
     has_confirmed_attendance: "boolean",
-    is_present: "boolean"
+    is_present: "boolean",
+    is_present_day2: "boolean"
   };
 
   const operatorMap = {

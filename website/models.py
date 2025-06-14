@@ -40,6 +40,7 @@ class Registered(models.Model):
     has_downloaded_tag = models.BooleanField(default=False)
     has_confirmed_attendance = models.BooleanField(default=False)
     is_present = models.BooleanField(default=False)
+    is_present_day2 = models.BooleanField(default=False)
     labourer_note = models.TextField("Labourer Note", blank=True)
     breakout = models.ForeignKey(Breakouts, on_delete=models.SET_NULL, null=True, blank=True, related_name='registered_set')
 
@@ -54,3 +55,13 @@ class Resource(models.Model):
 
     def __str__(self):
         return self.name
+
+class Question(models.Model):
+    surname = models.CharField(max_length=100)
+    unique_id = models.UUIDField()
+    text = models.TextField()
+    remember = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Q from {self.surname} @ {self.created_at.strftime('%Y-%m-%d %H:%M')}"

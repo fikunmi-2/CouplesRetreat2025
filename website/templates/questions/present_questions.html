@@ -1,0 +1,94 @@
+{% extends 'minimal.html' %}
+
+{% block extra_head %}
+  <meta http-equiv="refresh" content="30">
+<style>
+  html, body {
+    height: 100%;
+    background-color: #f0f4f8;
+    overflow: hidden; /* no page scroll */
+  }
+
+  .presentation-wrapper {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+  }
+
+.question-card {
+  max-width: 1100px;
+  width: 100%;
+  max-height: 75vh;            /* ⬆ More vertical space */
+  padding: 3rem;
+  font-size: 2.2rem;           /* ⬇ Slightly smaller text */
+  font-weight: 500;            /* Less heavy than bold */
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+  .question-card::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .question-card::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 4px;
+  }
+
+  .meta {
+    font-size: 1.25rem;
+    color: #6c757d;
+    margin-top: 1rem;
+  }
+
+  .nav-buttons,
+  .jump-form {
+    margin-top: 2rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="presentation-wrapper" id="presentation-wrapper">
+
+  {% if no_questions %}
+    <div class="alert alert-warning">No questions have been submitted yet.</div>
+  {% else %}
+    <div class="question-card">
+      {{ question.text }}
+      <div class="meta">Question {{ q_index }} of {{ total }}</div>
+    </div>
+
+    <div class="nav-buttons d-flex flex-wrap justify-content-center gap-3 mt-4">
+      <a href="?q=1" class="btn btn-outline-dark btn-sm" {% if not has_prev %}disabled{% endif %}>⏮ First</a>
+      <a href="?q={{ q_index|add:"-1" }}" class="btn btn-outline-dark btn-sm" {% if not has_prev %}disabled{% endif %}>⬅ Previous</a>
+      <a href="?q={{ q_index|add:"1" }}" class="btn btn-outline-dark btn-sm" {% if not has_next %}disabled{% endif %}>Next ➡</a>
+      <a href="?q={{ last_q }}" class="btn btn-outline-dark btn-sm" {% if not has_next %}disabled{% endif %}>⏭ Last</a>
+    </div>
+
+    <form class="jump-form d-flex justify-content-center gap-2 mt-3" method="get">
+      <input type="number" name="q" min="1" max="{{ total }}" placeholder="Go to #" class="form-control w-auto form-control-sm" required>
+      <button type="submit" class="btn btn-outline-dark btn-sm">Go</button>
+    </form>
+      <a href="{% url 'admin_question_list' %}" style="
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      font-size: 0.8rem;
+      color: #adb5bd;
+      text-decoration: none;
+    ">
+      View All
+    </a>
+
+  {% endif %}
+</div>
+
+{% endblock %}
