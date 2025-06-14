@@ -699,7 +699,7 @@ def submit_question(request, surname, unique_id):
         messages.success(request, "Your question was submitted.")
         return redirect('submit_question', surname=surname, unique_id=unique_id)
 
-    return render(request, 'questions\submit_question.html', {
+    return render(request, 'questions/submit_question.html', {
         'questions': remembered_questions,
         'surname': surname,
         'unique_id': unique_id
