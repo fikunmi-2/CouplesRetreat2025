@@ -65,3 +65,47 @@ class Question(models.Model):
 
     def __str__(self):
         return f"Q from {self.surname} @ {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+# models.py
+from django.db import models
+from uuid import UUID
+
+class Feedback(models.Model):
+    SATISFACTION_CHOICES = [
+        ('Very satisfied', 'Very satisfied'),
+        ('Satisfied', 'Satisfied'),
+        ('Neutral', 'Neutral'),
+        ('Dissatisfied', 'Dissatisfied'),
+        ('Very dissatisfied', 'Very dissatisfied'),
+    ]
+
+    USABILITY_CHOICES = [
+        ('Very easy', 'Very easy'),
+        ('Easy', 'Easy'),
+        ('Neutral', 'Neutral'),
+        ('Difficult', 'Difficult'),
+        ('Very difficult', 'Very difficult'),
+    ]
+
+    COMPLETION_CHOICES = [
+        ('Everything worked perfectly', 'Everything worked perfectly'),
+        ('Yes, mostly smooth', 'Yes, mostly smooth'),
+        ('Neutral', 'Neutral'),
+        ('I had a few issues', 'I had a few issues'),
+        ('No, I couldn’t do most things', 'No, I couldn’t do most things'),
+    ]
+
+    unique_id = models.UUIDField()
+    surname = models.CharField(max_length=120)
+    registration_code = models.CharField(max_length=6)
+
+    satisfaction = models.CharField(max_length=20, choices=SATISFACTION_CHOICES)
+    usability = models.CharField(max_length=20, choices=USABILITY_CHOICES)
+    completion = models.CharField(max_length=40, choices=COMPLETION_CHOICES)
+    suggestions = models.TextField(blank=True)
+    seminar_ideas = models.TextField(blank=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.surname} - {self.registration_code}"
+

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="card shadow-lg">
+    <div class="card-body p-4">
+      <!-- Decorative Header -->
+      <div class="text-center mb-4">
+        <div class="heart-icon mb-2">📝</div>
+        <h2 class="heading-title">Retreat Feedback Form</h2>
+        <p class="sub-note">Thank you for being part of Couples Retreat 2025. Please take a moment to share your experience.</p>
+      </div>
+
+      <form method="POST" novalidate>
+        {% csrf_token %}
+
+        <!-- Hidden meta info -->
+        <input type="hidden" name="surname" value="{{ couple.s_name }}">
+        <input type="hidden" name="unique_id" value="{{ couple.unique_id }}">
+
+        <!-- 1. Satisfaction -->
+        <h5 class="section-title text-primary mt-4">1. Overall, how satisfied are you with the retreat?</h5>
+        <div class="section-divider mb-3"></div>
+        <div class="mb-3">
+          {% for radio in form.satisfaction %}
+            <div class="form-check form-check-inline">
+              {{ radio.tag }}
+              <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+            </div>
+          {% endfor %}
+          {% if form.satisfaction.errors %}
+            <small class="form-error">⚠ {{ form.satisfaction.errors|striptags }}</small>
+          {% endif %}
+        </div>
+
+        <!-- 2. Ease of Use -->
+        <h5 class="section-title text-primary mt-4">2. How easy was it to interact with the website?</h5>
+        <div class="section-divider mb-3"></div>
+        <div class="mb-3">
+          {% for radio in form.usability %}
+            <div class="form-check form-check-inline">
+              {{ radio.tag }}
+              <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+            </div>
+          {% endfor %}
+          {% if form.usability.errors %}
+            <small class="form-error">⚠ {{ form.usability.errors|striptags }}</small>
+          {% endif %}
+        </div>
+
+        <!-- 3. Completion Experience -->
+        <h5 class="section-title text-primary mt-4">3. Were you able to complete all actions smoothly?</h5>
+        <div class="form-text mb-2 text-muted">
+          (e.g. Registration, Seminar Selection, Tag Download, Viewing Info Page)
+        </div>
+        <div class="section-divider mb-3"></div>
+        <div class="mb-3">
+          {% for radio in form.completion %}
+            <div class="form-check form-check-inline">
+              {{ radio.tag }}
+              <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+            </div>
+          {% endfor %}
+          {% if form.completion.errors %}
+            <small class="form-error">⚠ {{ form.completion.errors|striptags }}</small>
+          {% endif %}
+        </div>
+
+        <!-- 4. Suggestions -->
+        <h5 class="section-title text-primary mt-4">4. Suggestions for Improvement</h5>
+        <div class="section-divider mb-3"></div>
+        <div class="mb-3">
+          {{ form.suggestions }}
+          {% if form.suggestions.errors %}
+            <small class="form-error">⚠ {{ form.suggestions.errors|striptags }}</small>
+          {% endif %}
+        </div>
+
+        <!-- 5. Future Seminar Ideas -->
+        <h5 class="section-title text-primary mt-4">5. What seminar topics would you like in the future?</h5>
+        <div class="section-divider mb-3"></div>
+        <div class="mb-3">
+          {{ form.seminar_ideas }}
+          {% if form.seminar_ideas.errors %}
+            <small class="form-error">⚠ {{ form.seminar_ideas.errors|striptags }}</small>
+          {% endif %}
+        </div>
+
+        <!-- Submit -->
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-primary px-5">Submit Feedback</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .heart-icon {
+    font-size: 2rem;
+  }
+  .heading-title {
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: #c2185b;
+  }
+  .sub-note {
+    font-size: 0.95rem;
+    color: #555;
+  }
+  .section-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    margin-top: 2rem;
+  }
+  .section-divider {
+    height: 4px;
+    background: linear-gradient(to right, #c2185b, #2196f3, transparent);
+    border-radius: 5px;
+  }
+  .form-error {
+      color: #dc3545;
+      font-size: 0.85rem;
+      display: block;
+      margin-top: 3px;
+      animation: fadeIn 0.3s ease-in-out;
+  }
+  .card {
+    background: linear-gradient(to bottom right, #ffe6ea, #e4f0ff);
+    border: none;
+    border-radius: 15px;
+  }
+</style>
+{% endblock %}

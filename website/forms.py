@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Registered, Breakouts
+from .models import *
 import phonenumbers
 
 class RegisterForm(ModelForm):
@@ -105,3 +105,58 @@ class BreakoutForm(forms.ModelForm):
         label="Maximum Number of Participants",
         widget=forms.NumberInput(attrs={'class': 'form-control'})
     )
+
+class FeedbackForm(forms.ModelForm):
+    SATISFACTION_CHOICES = [
+        ('Very satisfied', 'Very satisfied'),
+        ('Satisfied', 'Satisfied'),
+        ('Neutral', 'Neutral'),
+        ('Dissatisfied', 'Dissatisfied'),
+        ('Very dissatisfied', 'Very dissatisfied'),
+    ]
+
+    USABILITY_CHOICES = [
+        ('Very easy', 'Very easy'),
+        ('Easy', 'Easy'),
+        ('Neutral', 'Neutral'),
+        ('Difficult', 'Difficult'),
+        ('Very difficult', 'Very difficult'),
+    ]
+
+    COMPLETION_CHOICES = [
+        ('Everything worked perfectly', 'Everything worked perfectly'),
+        ('Yes, mostly smooth', 'Yes, mostly smooth'),
+        ('Neutral', 'Neutral'),
+        ('I had a few issues', 'I had a few issues'),
+        ('No, I couldn’t do most things', 'No, I couldn’t do most things'),
+    ]
+
+    satisfaction = forms.ChoiceField(
+        choices=SATISFACTION_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        label="Satisfaction"
+    )
+    usability = forms.ChoiceField(
+        choices=USABILITY_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        label="Ease of Use"
+    )
+    completion = forms.ChoiceField(
+        choices=COMPLETION_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        label="Completion"
+    )
+    suggestions = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        label="Suggestions"
+    )
+    seminar_ideas = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        label="Seminar Ideas"
+    )
+
+    class Meta:
+        model = Feedback
+        fields = ['satisfaction', 'usability', 'completion', 'suggestions', 'seminar_ideas']

@@ -4,61 +4,56 @@
 <div class="container mt-4">
   <h2 class="mb-4 text-center">Hi {{ request.user.username }}, your assigned couples</h2>
 
-    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3 text-center mb-4 flex-nowrap overflow-auto">
-  <div class="col" style="min-width: 180px;">
-    <div class="card border-primary shadow-sm">
-      <div class="card-body py-3 px-2">
-        <h6 class="card-title mb-1">Couples</h6>
-        <p class="card-text h4 mb-0">{{ total_count }}</p>
+<div class="row row-cols-1 row-cols-md-6 g-3 text-center mb-4">
+      <div class="col">
+        <div class="card border-primary shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Couples</h5>
+            <p class="card-text display-6">{{ total_count }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card border-success shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Tag</h5>
+            <p class="card-text display-6">{{ tag_downloaded_count }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card border-info shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Confirmed Att</h5>
+            <p class="card-text display-6">{{ confirmed_attendance_count }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card border-danger shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Breakout</h5>
+            <p class="card-text display-6">{{ breakout_selected_count }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card border-warning shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Present</h5>
+            <p class="card-text display-6">{{ present_count }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card border-warning shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Present 2</h5>
+            <p class="card-text display-6">{{ present_count_day2 }}</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="col" style="min-width: 180px;">
-    <div class="card border-success shadow-sm">
-      <div class="card-body py-3 px-2">
-        <h6 class="card-title mb-1">Downloaded Tag</h6>
-        <p class="card-text h4 mb-0">{{ tag_downloaded_count }}</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col" style="min-width: 180px;">
-    <div class="card border-info shadow-sm">
-      <div class="card-body py-3 px-2">
-        <h6 class="card-title mb-1">Confirmed Att</h6>
-        <p class="card-text h4 mb-0">{{ confirmed_attendance_count }}</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col" style="min-width: 180px;">
-    <div class="card border-danger shadow-sm">
-      <div class="card-body py-3 px-2">
-        <h6 class="card-title mb-1">Breakout</h6>
-        <p class="card-text h4 mb-0">{{ breakout_selected_count }}</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col" style="min-width: 180px;">
-    <div class="card border-warning shadow-sm">
-      <div class="card-body py-3 px-2">
-        <h6 class="card-title mb-1">Present</h6>
-        <p class="card-text h4 mb-0">{{ present_count }}</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col" style="min-width: 180px;">
-    <div class="card border-warning shadow-sm">
-      <div class="card-body py-3 px-2">
-        <h6 class="card-title mb-1">Present 2</h6>
-        <p class="card-text h4 mb-0">{{ present_count_day2 }}</p>
-      </div>
-    </div>
-  </div>
-</div>
 
 
   <table class="table table-secondary table-striped table-hover">

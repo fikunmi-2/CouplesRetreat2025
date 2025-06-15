@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-5">
+  <div class="card shadow-lg p-4">
+    <h2 class="text-center text-body-emphasis mb-4">📋 All Submitted Feedback</h2>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle">
+        <thead class="table">
+          <tr>
+              <th>#</th>
+            <th>Surname</th>
+            <th>Registration Code</th>
+            <th>Satisfaction</th>
+            <th>Usability</th>
+            <th>Completion</th>
+            <th>Suggestions</th>
+            <th>Seminar Ideas</th>
+            <th>Submitted At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fb in feedbacks %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+              <td>{{ fb.surname }}</td>
+              <td>{{ fb.registration_code }}</td>
+              <td>{{ fb.satisfaction }}</td>
+              <td>{{ fb.usability }}</td>
+              <td>{{ fb.completion }}</td>
+              <td>{{ fb.suggestions|default:"-" }}</td>
+              <td>{{ fb.seminar_ideas|default:"-" }}</td>
+              <td>{{ fb.submitted_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" class="text-center text-muted">No feedback submitted yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

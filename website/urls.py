@@ -36,5 +36,8 @@ urlpatterns = [
     path('questions/edit/<int:pk>/<str:surname>/<uuid:unique_id>/', views.edit_question, name='edit_question'),
     path('view_questions/', views.list_all_questions, name='admin_question_list'),
     path('questions/presenter/', views.present_questions, name='present_questions'),
-
+    path('feedback/<str:surname>/<uuid:unique_id>/', views.submit_feedback, name='submit_feedback'),
+    path('feedback-thank-you/<uuid:unique_id>/', views.feedback_thank_you, name='feedback_thank_you'),
+    path('feedbacks_list/', views.feedback_list, name='feedback_list'),
+    path('export_feedback_excel', views.export_feedback_excel, name='export_feedback_excel'),
 ]

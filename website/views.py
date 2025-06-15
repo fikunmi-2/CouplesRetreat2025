@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
-from .forms import RegisterForm, BreakoutForm
+from .forms import *
 
 from openpyxl import load_workbook
 from django import forms
@@ -129,7 +129,7 @@ def register(request):
     return render(request, 'registration_closed.html', {})
 
 def thank_you(request, unique_id):
-    couple = Registered.objects.get(unique_id=unique_id)  # Replace with your actual model if different
+    couple = Registered.objects.get(unique_id=unique_id)
     return render(request, 'thank_you.html', {'couple': couple})
 
 @superuser_required
@@ -772,3 +772,69 @@ def present_questions(request):
     }
 
     return render(request, 'questions/present_questions.html', context)
+
+def submit_feedback(request, surname, unique_id):
+    reg = get_object_or_404(Registered, unique_id=unique_id, s_name__iexact=surname)
+
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.unique_id = reg.unique_id
+            feedback.surname = reg.s_name
+            feedback.registration_code = generate_stable_code(reg.unique_id)
+            feedback.save()
+            return redirect('feedback_thank_you', reg.unique_id)  # make sure to create this
+    else:
+        form = FeedbackForm()
+
+    return render(request, 'feedback_form.html', {
+        'form': form,
+        'couple': reg,
+    })
+
+def feedback_thank_you(request, unique_id):
+    couple = Registered.objects.get(unique_id=unique_id)
+    return render(request, 'feedback_thank_you.html', {'couple': couple})
+
+@superuser_required
+def feedback_list(request):
+    feedbacks = Feedback.objects.all().order_by('-submitted_at')
+    return render(request, 'feedback_list.html', {'feedbacks': feedbacks})
+
+@superuser_required
+def export_feedback_excel(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Feedback Responses"
+
+    # Header row
+    headers = [
+        "Surname", "Registration Code", "Unique ID",
+        "Satisfaction", "Website Usability", "Completion Experience",
+        "Suggestions", "Seminar Ideas", "Submitted At"
+    ]
+    ws.append(headers)
+
+    # Populate rows
+    for fb in Feedback.objects.all().order_by('-submitted_at'):
+        row = [
+            fb.surname,
+            fb.registration_code,
+            str(fb.unique_id),
+            fb.satisfaction,
+            fb.usability,
+            fb.completion,
+            fb.suggestions or "",
+            fb.seminar_ideas or "",
+            fb.submitted_at.strftime('%Y-%m-%d %H:%M:%S'),
+        ]
+        ws.append(row)
+
+    # Prepare response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=retreat_feedback.xlsx'
+    wb.save(response)
+    return response
