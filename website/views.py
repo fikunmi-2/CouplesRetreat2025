@@ -156,6 +156,7 @@ def delete_registee(request, unique_id):
     reg_couple.delete()
     return redirect('view-registered')
 
+@superuser_required
 def pdf_registee(request, unique_id):
     import qrcode
     from PIL import Image
@@ -258,7 +259,7 @@ def pdf_registee(request, unique_id):
 
     return FileResponse(buf, as_attachment=True, filename=f'{reg_couple.s_name}.pdf')
 
-
+@superuser_required
 def download_tag(request, surname, unique_id):
     reg_couple = get_object_or_404(Registered, s_name__iexact=surname, unique_id=unique_id)
     return render(request, 'download_tag.html', {'registered': reg_couple})
@@ -269,6 +270,7 @@ def view_registee(request, unique_id):
     reg_code = generate_stable_code(unique_id)
     return render(request, 'view_registee.html', {'registered': reg_couple, 'reg_code': reg_code})
 
+@superuser_required
 def confirm_attendance(request, surname, unique_id):
     reg_couple = get_object_or_404(Registered, s_name__iexact=surname, unique_id=unique_id)
 
@@ -541,6 +543,7 @@ def delete_breakout(request, breakout_id):
         'assigned_count': assigned_count
     })
 
+@superuser_required
 def choose_breakout(request, unique_id):
     couple = get_object_or_404(Registered, unique_id=unique_id)
     user = request.user
@@ -680,6 +683,12 @@ def send_verification_code(couple, input_phone):
 
 
 def submit_question(request, surname, unique_id):
+    reg = get_object_or_404(Registered, unique_id=unique_id)
+
+    if not reg.is_present:
+        messages.warning(request, "You do not have permission to access this page.")
+        return redirect("couple_welcome", surname=reg.s_name,unique_id=reg.unique_id)
+
     remembered_questions = Question.objects.filter(
         surname__iexact=surname,
         unique_id=unique_id,
@@ -775,6 +784,10 @@ def present_questions(request):
 
 def submit_feedback(request, surname, unique_id):
     reg = get_object_or_404(Registered, unique_id=unique_id, s_name__iexact=surname)
+
+    if not reg.is_present:
+        messages.warning(request, "You do not have permission to access this page.")
+        return redirect("couple_welcome", surname=reg.s_name,unique_id=reg.unique_id)
 
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
